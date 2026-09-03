@@ -1,0 +1,6 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-REF-DUP-DECL",
+  "go_test": "planned"
+}

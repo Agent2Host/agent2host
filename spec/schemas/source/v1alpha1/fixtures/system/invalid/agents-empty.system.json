@@ -1,0 +1,7 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "AgentSystem",
+  "id": "club-system",
+  "version": "1.0.0",
+  "agents": []
+}

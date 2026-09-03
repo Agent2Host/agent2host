@@ -1,0 +1,16 @@
+{
+  "hooks": [
+    {
+      "ref": "/hooks/req/0",
+      "required": true
+    },
+    {
+      "ref": "/hooks/opt/0",
+      "required": false
+    },
+    {
+      "ref": "/hooks/approx/0",
+      "required": true
+    }
+  ]
+}

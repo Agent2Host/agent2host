@@ -1,0 +1,75 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      A2H_REQUIRE_AJV: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            spec/schemas/source/v1alpha1/fixtures/package-lock.json
+            spec/schemas/compatibility/v1alpha1/fixtures/package-lock.json
+      - name: Source schema fixtures
+        working-directory: spec/schemas/source/v1alpha1/fixtures
+        run: npm ci && npm test
+      - name: Compatibility report fixtures
+        working-directory: spec/schemas/compatibility/v1alpha1/fixtures
+        run: npm ci && npm test
+      - name: Go format
+        run: test -z "$(gofmt -l .)"
+      - name: Go vet
+        run: go vet ./...
+      - name: Go tests
+        run: go test ./...
+      - name: Go race
+        run: go test -race ./...
+
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Cross-compile
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -trimpath -o /tmp/a2h-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/a2h
+
+  macos-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Native build
+        run: go build -trimpath -o /tmp/a2h ./cmd/a2h
+      - name: Print version
+        run: /tmp/a2h version

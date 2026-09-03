@@ -1,0 +1,46 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.ctx.min-req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/context/items/0",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.ctx.min-opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/context/items/1",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.approx.ctx",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "visible_loss",
+      "item_locator": "/capabilities/context/items/2",
+      "requirement_result": "degraded"
+    },
+    {
+      "branch_id": "br.facts.opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/capabilities/context/items/3",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.iso.ctx-req",
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "reason_code": "isolation_too_broad",
+      "item_locator": "/security/context_isolation/items/0",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.iso.ctx-opt",
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "reason_code": "isolation_too_broad",
+      "item_locator": "/security/context_isolation/items/1",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

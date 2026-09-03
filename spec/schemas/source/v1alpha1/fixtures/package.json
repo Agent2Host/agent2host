@@ -1,0 +1,12 @@
+{
+  "name": "agent2host-v1alpha1-fixtures",
+  "private": true,
+  "type": "module",
+  "description": "Ajv 8 Draft 2020-12 fixtures for published Agent2Host Source schemas. Not a published npm package.",
+  "scripts": {
+    "test": "node validate.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
+}

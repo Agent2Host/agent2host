@@ -1,0 +1,6 @@
+{
+  "register": "success",
+  "rule_id": "SRC-MD-FRONTMATTER",
+  "go_test": "planned",
+  "notes": "Leading --- is ordinary SOP body text; register must not fail."
+}

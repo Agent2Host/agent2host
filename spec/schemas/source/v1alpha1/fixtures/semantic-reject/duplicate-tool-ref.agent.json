@@ -1,0 +1,22 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md",
+  "mcp_servers": {
+    "club": {
+      "transport": "stdio",
+      "command": "python",
+      "files": [
+        "./mcp/club.py"
+      ],
+      "tools": [
+        "search_policy",
+        {
+          "name": "search_policy",
+          "required": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sop.min-fail",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/sop",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

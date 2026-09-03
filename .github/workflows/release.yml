@@ -1,0 +1,113 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v0.1.0-alpha.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build artifacts
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          commit="${GITHUB_SHA}"
+          built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          ldflags="-s -w -X github.com/agent2host/agent2host/internal/cli.Version=${version} -X github.com/agent2host/agent2host/internal/cli.Commit=${commit} -X github.com/agent2host/agent2host/internal/cli.BuildTime=${built}"
+          mkdir -p dist
+          targets="darwin/arm64 darwin/amd64 linux/amd64 linux/arm64"
+          for pair in $targets; do
+            goos="${pair%/*}"
+            goarch="${pair#*/}"
+            name="a2h-${tag}-${goos}-${goarch}"
+            GOOS="$goos" GOARCH="$goarch" go build -trimpath -ldflags "$ldflags" -o "dist/${name}/a2h" ./cmd/a2h
+            cp LICENSE "dist/${name}/LICENSE"
+            tar -C "dist/${name}" -czf "dist/${name}.tar.gz" a2h LICENSE
+          done
+          (cd dist && sha256sum *.tar.gz > SHA256SUMS)
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+          echo "TAG=${tag}" >> "$GITHUB_ENV"
+      - name: Write tap formula
+        run: |
+          python3 <<'PY'
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          tag = os.environ["TAG"]
+          sums = {}
+          for line in Path("dist/SHA256SUMS").read_text().splitlines():
+              digest, name = line.split()
+              sums[name] = digest
+
+          def sha(suffix: str) -> str:
+              name = f"a2h-{tag}-{suffix}.tar.gz"
+              return sums[name]
+
+          Path("dist/a2h.rb").write_text(
+              "\n".join(
+                  [
+                      "class A2h < Formula",
+                      '  desc "Register an Agent System and run a Named Agent on Claude Code, Kiro, or Codex"',
+                      '  homepage "https://github.com/agent2host/agent2host"',
+                      f'  version "{version}"',
+                      '  license "Apache-2.0"',
+                      "",
+                      "  on_macos do",
+                      "    if Hardware::CPU.arm?",
+                      f'      url "https://github.com/agent2host/agent2host/releases/download/{tag}/a2h-{tag}-darwin-arm64.tar.gz"',
+                      f'      sha256 "{sha("darwin-arm64")}"',
+                      "    else",
+                      f'      url "https://github.com/agent2host/agent2host/releases/download/{tag}/a2h-{tag}-darwin-amd64.tar.gz"',
+                      f'      sha256 "{sha("darwin-amd64")}"',
+                      "    end",
+                      "  end",
+                      "",
+                      "  on_linux do",
+                      "    if Hardware::CPU.arm?",
+                      f'      url "https://github.com/agent2host/agent2host/releases/download/{tag}/a2h-{tag}-linux-arm64.tar.gz"',
+                      f'      sha256 "{sha("linux-arm64")}"',
+                      "    else",
+                      f'      url "https://github.com/agent2host/agent2host/releases/download/{tag}/a2h-{tag}-linux-amd64.tar.gz"',
+                      f'      sha256 "{sha("linux-amd64")}"',
+                      "    end",
+                      "  end",
+                      "",
+                      "  def install",
+                      '    bin.install "a2h"',
+                      "  end",
+                      "",
+                      "  test do",
+                      '    assert_match version.to_s, shell_output("#{bin}/a2h version")',
+                      "  end",
+                      "end",
+                      "",
+                  ]
+              )
+          )
+          PY
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "Public alpha ${TAG}. Installs only the Agent2Host binary. Does not install Claude Code, Kiro, or Codex. Not a stable v0.1.0." \
+            dist/a2h-${TAG}-darwin-arm64.tar.gz \
+            dist/a2h-${TAG}-darwin-amd64.tar.gz \
+            dist/a2h-${TAG}-linux-amd64.tar.gz \
+            dist/a2h-${TAG}-linux-arm64.tar.gz \
+            dist/SHA256SUMS \
+            dist/a2h.rb

@@ -1,0 +1,7 @@
+{
+  "security": {
+    "output_validation": {
+      "required": true
+    }
+  }
+}

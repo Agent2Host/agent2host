@@ -1,0 +1,7 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-PATH-COLLIDE",
+  "go_test": "planned",
+  "notes": "After exact dedup, remaining distinct paths share an ASCII-case collision key."
+}

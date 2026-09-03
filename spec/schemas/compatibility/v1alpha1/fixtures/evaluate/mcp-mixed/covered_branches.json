@@ -1,0 +1,46 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.tool.min-req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/mcp/items/0",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.tool.min-opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/mcp/items/1",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.approx.tool",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "visible_loss",
+      "item_locator": "/capabilities/mcp/items/2",
+      "requirement_result": "degraded"
+    },
+    {
+      "branch_id": "br.mcp.srv-req",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "reason_code": "server_not_connected",
+      "item_locator": "/capabilities/mcp/items/3",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.mcp.srv-opt",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "reason_code": "server_not_connected",
+      "item_locator": "/capabilities/mcp/items/4",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.iso.mcp-req",
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "reason_code": "isolation_too_broad",
+      "item_locator": "/security/mcp_tool_isolation/items/0",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

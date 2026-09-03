@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sop.approx",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "visible_loss",
+      "item_locator": "/capabilities/sop",
+      "requirement_result": "degraded"
+    }
+  ]
+}

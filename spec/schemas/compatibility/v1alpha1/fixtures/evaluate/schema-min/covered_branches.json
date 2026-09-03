@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.schema.min",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/output_schema",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

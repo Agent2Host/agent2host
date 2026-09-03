@@ -1,0 +1,7 @@
+{
+  "register": "success",
+  "rule_id": "SRC-REF-FILENAME",
+  "warning": true,
+  "go_test": "planned",
+  "notes": "Basename stem != Agent id; register succeeds with warning."
+}

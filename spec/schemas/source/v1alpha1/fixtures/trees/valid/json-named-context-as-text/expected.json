@@ -1,0 +1,6 @@
+{
+  "register": "success",
+  "rule_id": "SRC-ENC-CTX",
+  "go_test": "planned",
+  "notes": ".json Context is UTF-8 text, not JSON-Schema-validated as Context."
+}

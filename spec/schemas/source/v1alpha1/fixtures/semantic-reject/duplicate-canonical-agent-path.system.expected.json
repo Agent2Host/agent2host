@@ -1,0 +1,7 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-REF-AGENTS-LIST",
+  "go_test": "planned",
+  "notes": "Authoring strings differ; canonical paths are identical. uniqueItems does not catch this."
+}

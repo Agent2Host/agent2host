@@ -1,0 +1,6 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-PATH-HARD-DENY",
+  "go_test": "planned"
+}

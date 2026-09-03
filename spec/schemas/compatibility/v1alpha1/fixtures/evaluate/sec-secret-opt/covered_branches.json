@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.secret-opt",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "secret_scope_too_broad",
+      "item_locator": "/security/secret_isolation/items/0",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "schema_version": "agent2host/compatibility-report/v1alpha1",
+  "agent2host_version": "0.0.0-hc040",
+  "subject": {
+    "system_id": "club-system",
+    "agent_id": "club-faq",
+    "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+  },
+  "host": {
+    "id": "codex",
+    "version": "actual-version"
+  },
+  "adapter": {
+    "id": "codex",
+    "version": "0.1.0"
+  },
+  "probe": {
+    "fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000002"
+  },
+  "decision": "refused",
+  "activation": {
+    "mode": "primary_native",
+    "confidence": "documented",
+    "requirement_result": "satisfied"
+  },
+  "capabilities": {
+    "sop": {
+      "support": "native",
+      "scope": "agent",
+      "confidence": "documented",
+      "requirement_result": "satisfied",
+      "disposition": "include"
+    },
+    "skills": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "context": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "mcp": {
+      "items": [
+        {
+          "server_id": "srv-tool-req",
+          "name": "t1",
+          "required": true,
+          "support": "unsupported",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "unsatisfied",
+          "disposition": "omit",
+          "reason_code": "acceptance_failed"
+        },
+        {
+          "server_id": "srv-tool-opt",
+          "name": "t2",
+          "required": false,
+          "support": "unsupported",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "unsatisfied",
+          "disposition": "omit",
+          "reason_code": "acceptance_failed"
+        },
+        {
+          "server_id": "srv-approx",
+          "name": "t3",
+          "required": true,
+          "support": "approximate",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "degraded",
+          "disposition": "include",
+          "reason_code": "visible_loss"
+        },
+        {
+          "server_id": "srv-req",
+          "name": "t4",
+          "required": true,
+          "support": "unsupported",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "unsatisfied",
+          "disposition": "omit",
+          "reason_code": "server_not_connected"
+        },
+        {
+          "server_id": "srv-opt",
+          "name": "t5",
+          "required": false,
+          "support": "unsupported",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "unsatisfied",
+          "disposition": "omit",
+          "reason_code": "server_not_connected"
+        }
+      ],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 1,
+        "unsatisfied": 4,
+        "unknown": 0,
+        "included": 1,
+        "omitted": 4,
+        "decision_impact": "refuse"
+      }
+    },
+    "hooks": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "output_schema": {
+      "support": "native",
+      "scope": "agent",
+      "confidence": "documented",
+      "requirement_result": "satisfied",
+      "disposition": "include"
+    }
+  },
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "context_isolation": {
+      "items": []
+    },
+    "mcp_tool_isolation": {
+      "items": [
+        {
+          "server_id": "srv-iso",
+          "support": "mapped",
+          "scope": "project",
+          "enforcement": "none",
+          "confidence": "documented",
+          "requirement_result": "unsatisfied",
+          "reason_code": "isolation_too_broad"
+        }
+      ]
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "secret_isolation": {
+      "items": []
+    }
+  }
+}

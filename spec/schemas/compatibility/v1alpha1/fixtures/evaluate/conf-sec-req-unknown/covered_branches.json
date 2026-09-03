@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.conf.sec-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/security/approvals",
+      "requirement_result": "unknown"
+    }
+  ]
+}

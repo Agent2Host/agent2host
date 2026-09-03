@@ -1,0 +1,6 @@
+{
+  "register": "success",
+  "rule_id": "SRC-ARGV-COMMAND",
+  "go_test": "planned",
+  "notes": "Windows drive-absolute command is legal and not packed as a Source member."
+}

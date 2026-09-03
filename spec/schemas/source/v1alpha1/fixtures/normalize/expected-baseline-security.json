@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  },
+  "sandbox": {
+    "required": false,
+    "mode": "workspace_write"
+  }
+}

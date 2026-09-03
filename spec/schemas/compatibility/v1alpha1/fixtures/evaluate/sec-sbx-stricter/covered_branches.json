@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.sbx-stricter",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "sandbox_stricter",
+      "item_locator": "/security/sandbox",
+      "requirement_result": "degraded"
+    }
+  ]
+}

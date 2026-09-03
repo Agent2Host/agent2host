@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.appr-stricter",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "approval_stricter",
+      "item_locator": "/security/approvals",
+      "requirement_result": "degraded"
+    }
+  ]
+}

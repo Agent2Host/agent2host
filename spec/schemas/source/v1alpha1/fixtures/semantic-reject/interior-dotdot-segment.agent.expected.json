@@ -1,0 +1,7 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-PATH-DOT",
+  "go_test": "planned",
+  "notes": "Interior .. is SRC-PATH-DOT (step 2), not SRC-PATH-ESCAPE. Leading ../other/... remains SRC-PATH-ESCAPE after DOT would also fail; this vector is interior so DOT wins."
+}

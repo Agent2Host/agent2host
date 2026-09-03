@@ -1,0 +1,19 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "AgentSystem",
+  "id": "entropy",
+  "version": "1.0.0",
+  "agents": [
+    "./agents/demo.agent.json"
+  ],
+  "skills": {
+    "pack": {
+      "name": "Pack",
+      "description": "High-entropy asset must warn, not fail.",
+      "document": "./skills/pack.skill.md",
+      "assets": [
+        "./assets/token.bin"
+      ]
+    }
+  }
+}

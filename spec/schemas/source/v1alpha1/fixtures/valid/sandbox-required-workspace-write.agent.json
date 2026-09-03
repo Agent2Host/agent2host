@@ -1,0 +1,10 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md",
+  "sandbox": {
+    "required": true,
+    "mode": "workspace_write"
+  }
+}

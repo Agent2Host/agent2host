@@ -1,0 +1,7 @@
+{
+  "security": {
+    "sandbox": {
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md",
+  "hooks": {
+    "session_start": [
+      {
+        "command": "python",
+        "args": [
+          "./hooks/start.py"
+        ],
+        "files": [
+          "./hooks/start.py"
+        ]
+      }
+    ],
+    "before_tool_call": [
+      {
+        "command": "true"
+      }
+    ],
+    "after_tool_call": [
+      {
+        "command": "true"
+      }
+    ],
+    "agent_stop": [
+      {
+        "command": "true"
+      }
+    ]
+  }
+}

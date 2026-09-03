@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.sbx-enforcement-unk",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/security/sandbox",
+      "requirement_result": "unknown"
+    }
+  ]
+}

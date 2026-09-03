@@ -1,0 +1,12 @@
+{
+  "name": "a2h-compatibility-report-fixtures",
+  "private": true,
+  "type": "module",
+  "description": "Ajv 8 Draft 2020-12 fixtures for published Compatibility Report Schema (v1alpha1). CMP-VAL-CONTRACT-FREEZE holds. Not CMP-VAL-IMPL.",
+  "scripts": {
+    "test": "node validate.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
+}

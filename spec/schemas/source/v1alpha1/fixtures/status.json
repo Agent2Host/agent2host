@@ -1,0 +1,1532 @@
+{
+  "schema_version": "agent2host/source-rule-status-v1",
+  "catalog_version": "1",
+  "formula": "executed + catalog_only + excluded + missing + not_applicable = indexed SRC-* rules",
+  "completeness": {
+    "defined_in_body": 118,
+    "indexed": 118,
+    "tracking_gaps": [],
+    "stale": [],
+    "missing": 0
+  },
+  "counts": {
+    "executed": 34,
+    "catalog_only": 38,
+    "excluded": 2,
+    "missing": 0,
+    "not_applicable": 44
+  },
+  "rules": [
+    {
+      "rule_id": "SRC-ARGV-ARGS",
+      "section": "8",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/args-opaque-relative/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ARGV-COMMAND",
+      "section": "8",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/argv-path-not-in-files.agent.json",
+        "semantic-reject/argv-drive-relative.agent.json",
+        "trees/valid/argv-windows-absolute/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ARGV-FILES",
+      "section": "8",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/argv-path-not-in-files.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "files is the only inclusion authority. Covered by argv-path-not-in-files.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-CONTENT-PRIVATE-KEY",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/pem-private-key/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-CONTENT-SCAN-WARN",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/high-entropy-asset-warns/"
+      ],
+      "supporting_checks": [],
+      "notes": "Warn must not fail register.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-DEFAULT-ARGS",
+      "section": "11",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Omitted Hook/MCP args ≡ []. Schema default annotation; fill is semantic.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-DEFAULT-EXT",
+      "section": "11",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Omitted extensions ≡ {} for validation; must not invent an empty object in the Artifact.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-DEFAULT-LOADING",
+      "section": "11",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/loading-on-demand.agent.json",
+        "invalid/loading-startup.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-DEFAULT-OUTPUT",
+      "section": "11",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/output-without-schema.agent.json",
+        "valid/output-with-schema.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-DEFAULT-REQ",
+      "section": "11",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Omitted required → true is normalization. Covered with SRC-DEFAULT-SHORT / SRC-SECRET-SHAPE defaults.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-DEFAULT-SEC",
+      "section": "11",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Alias: security fill is SRC-SEC-OMIT.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-DEFAULT-SHORT",
+      "section": "11",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/skill-short-and-long.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Short/long form is schema-valid. Equivalence after normalize is catalog-only.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-DEFAULT-SYSTEM",
+      "section": "11",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "normalize",
+      "fixture": [
+        "system/normalize/omit-defaults.system.json",
+        "system/normalize/empty-defaults.system.json",
+        "system/normalize/partial-defaults.system.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ENC-ASSET",
+      "section": "2",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/binary-asset/"
+      ],
+      "supporting_checks": [],
+      "notes": "Binary Asset tree is schema-valid. Hashing raw bytes is catalog-only until Go digest tests.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ENC-CTX",
+      "section": "2",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/json-named-context-as-text/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ENC-HASH",
+      "section": "2",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Artifact member hashing is Space digest, not Source JSON Schema.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ENC-JSON",
+      "section": "2",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Encoding taxonomy; accept/reject is SRC-JSON-UTF8 then SRC-JSON-SYNTAX.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ENC-MD",
+      "section": "2",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Encoding taxonomy; suffix/content accept/reject is SRC-MD-*.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ENC-SCHEMA",
+      "section": "2",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Encoding taxonomy; dialect accept/reject is SRC-OUT-*.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ENC-SCRIPT",
+      "section": "2",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Raw-bytes taxonomy for Hook/MCP/script sources. No Source JSON fixture.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-HOOK-AFTER",
+      "section": "7",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Host-mapping semantics for after_tool_call.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-HOOK-BEFORE",
+      "section": "7",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Host-mapping semantics for before_tool_call.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-HOOK-ENTRY",
+      "section": "7",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/hooks-closed-events.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Entry shape is Schema. Argv consistency is SRC-ARGV-*.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-HOOK-ENUM",
+      "section": "7",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/unknown-hook-event.agent.json",
+        "valid/hooks-closed-events.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-HOOK-START",
+      "section": "7",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Host-mapping semantics for session_start. Closed key set is SRC-HOOK-ENUM.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-HOOK-STOP",
+      "section": "7",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Host-mapping semantics for agent_stop.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-AGENT",
+      "section": "4",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Identity vocabulary. Field is schema-required id on Agent.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-HOST",
+      "section": "4",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Host/Adapter ids are not Source object fields.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-MCP-SERVER",
+      "section": "4",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Identity vocabulary. MCP server ids are map keys.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-NUL",
+      "section": "4",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/command-embedded-nul.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ID-PATTERN",
+      "section": "4",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/id-syntax.agent.json",
+        "system/invalid/id-syntax.system.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ID-SCOPE",
+      "section": "4",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Applies-to table. Pattern enforcement is SRC-ID-PATTERN.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-SEMVER",
+      "section": "4",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "system/invalid/system-version-v-prefix.system.json",
+        "system/invalid/system-version-truncated.system.json",
+        "system/invalid/system-version-leading-zero.system.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-ID-SKILL",
+      "section": "4",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Identity vocabulary. Skill ids are map keys (propertyNames local_id).",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-SYSTEM",
+      "section": "4",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Identity vocabulary. Field is schema-required id on system.json.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-ID-TERMINATOR",
+      "section": "4",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/identifier-final-newline.agent.json",
+        "invalid/identifier-cr.agent.json",
+        "invalid/identifier-line-separator.agent.json",
+        "invalid/identifier-paragraph-separator.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "U+000A, U+000D, U+2028, U+2029. Ajv 8 pattern rejects these; Go must still not rely on regex $ alone (SRC-VAL-LAYERS).",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-DUP",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "json_reader",
+      "fixture": [
+        "json_reader/duplicate-json-key.raw"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-EMPTY-STR",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/empty-id.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-NULL",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/null-id.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-SNAKE",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/camel-case-field.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-SYNTAX",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "json_reader",
+      "fixture": [
+        "json_reader/json-syntax-error.raw"
+      ],
+      "supporting_checks": [],
+      "notes": "Valid UTF-8, illegal JSON. Parse fails before schema.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-UNKNOWN",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/unknown-field.agent.json",
+        "system/invalid/unknown-field.system.json",
+        "invalid/permission-unknown-field.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-JSON-UTF8",
+      "section": "2",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "json_reader",
+      "fixture": [
+        "json_reader/bom-utf8.raw",
+        "json_reader/invalid-utf8.raw"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-MCP-FILES",
+      "section": "8",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Pack-list authority; argv consistency fixtures cover files membership.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-MCP-NO-JOIN",
+      "section": "8",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Implementation identity rule. Report uses server_id + name. No Source instance fixture.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-MCP-SKILL-REF",
+      "section": "8",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/skill-mcp-not-allowed/",
+        "trees/invalid/skill-mcp-missing-server/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-MCP-TOOL-NAME",
+      "section": "8",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Opaque tool names: minLength 1 in Schema. No SRC-ID-PATTERN.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-MCP-TOOLS-REQ",
+      "section": "8",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/mcp-tools-omitted.agent.json",
+        "valid/mcp-tools-empty.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-MCP-TRANSPORT",
+      "section": "8",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/mcp-http-transport.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-MD-FRONTMATTER",
+      "section": "2",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/markdown-leading-dashes/"
+      ],
+      "supporting_checks": [],
+      "notes": "Leading --- must not fail register. Tree is schema-valid; Go register is planned.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-MD-SKILL",
+      "section": "2",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/skill-wrong-suffix.system.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-MD-SOP",
+      "section": "2",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/sop-wrong-suffix.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-OUT-DIALECT",
+      "section": "11",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/output-schema-draft07/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-OUT-META",
+      "section": "11",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Must be valid 2020-12 meta-schema. Covered with dialect/root trees; dedicated meta-schema fail vector not separately named.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-OUT-REF",
+      "section": "11",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/output-schema-http-ref/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-OUT-ROOT",
+      "section": "11",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/output-schema-boolean-true/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-OUT-UTF8",
+      "section": "11",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Output schema file encoding. BOM/UTF-8 for Source JSON is SRC-JSON-UTF8; schema-file bytes are filesystem catalog-only via SRC-OUT-DIALECT trees.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-PATH-ASCII",
+      "section": "5",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/non-ascii-path.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-CANON",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "artifact/valid/two-members.json",
+        "trees/valid/club-system/"
+      ],
+      "supporting_checks": [],
+      "notes": "Canonical form is schema-checked on Artifact path. Authoring portable_path still allows leading ./ .",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-COLLIDE",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/path-case-collision.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-DECLARED",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/declared-missing-unused-file/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-DEDUP",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/shared-exact-path/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-DOT",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/interior-dot-segment.agent.json",
+        "semantic-reject/interior-dotdot-segment.agent.json"
+      ],
+      "supporting_checks": [
+        "schema rejects empty segment (invalid/empty-path-segment.agent.json)",
+        "semantic expected covers interior . segment",
+        "semantic expected covers interior .. segment"
+      ],
+      "notes": "Whole-rule status is catalog_only: interior . and .. are not executed by a semantic validator in Node. Empty // is a Schema supporting check only. Canonicalize order: strip at most one leading ./; equals .. or starts with ../ → ESCAPE; remaining empty/. /.. → DOT; then containment → ESCAPE. Leading ./sops/... remains legal.",
+      "in_markdown_table": true,
+      "expected": "register fail SRC-PATH-DOT"
+    },
+    {
+      "rule_id": "SRC-PATH-ESCAPE",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/path-escape.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Leading ../other/... is ESCAPE before interior DOT. Interior foo/../bar is SRC-PATH-DOT.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-HARD-DENY",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/secret-filename.agent.json",
+        "semantic-reject/git-segment.agent.json",
+        "trees/valid/env-example/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-MSG",
+      "section": "5",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Error-message spelling only. Not accept/reject.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-PATH-NFC",
+      "section": "5",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "not_applicable_v1alpha1",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "V0 portable_path is ASCII-only. NFC is identity on that subset; composed vs decomposed Unicode never reaches this rule. Not applicable in agent2host/v1alpha1.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-PATH-REL",
+      "section": "5",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/absolute-path.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Leading / is schema-rejected by portable_path.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-SEP",
+      "section": "5",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/backslash-path.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Backslash separator is schema-rejected. Implementations MUST NOT convert \\ to /.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-TYPE",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/generated/path-type/"
+      ],
+      "supporting_checks": [
+        "catalog.json cases: symlink leaf, symlink component, directory, fifo, unix-socket, device",
+        "expected.json register fail SRC-PATH-TYPE"
+      ],
+      "notes": "Git cannot store FIFO/socket/device. Recipe locks construct method + expected rule_id. setup.mjs writes gitignored work/. Device is synthetic metadata only. Do not treat recipe as executed register.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-PATH-WINDOWS-RESERVED",
+      "section": "5",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/windows-device-name.agent.json",
+        "semantic-reject/trailing-dot-path.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-AGENTS-LIST",
+      "section": "6",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "system/invalid/agents-empty.system.json",
+        "semantic-reject/duplicate-canonical-agent-path.system.json"
+      ],
+      "supporting_checks": [
+        "semantic-reject/duplicate-canonical-agent-path.system.expected.json"
+      ],
+      "notes": "minItems: 1 is Schema-executed. Duplicate canonical paths (./agents/x vs agents/x) are catalog-only expected.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-DUP-AGENT",
+      "section": "6",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/duplicate-agent-id/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-DUP-DECL",
+      "section": "6",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/duplicate-skill-ref.agent.json",
+        "semantic-reject/duplicate-tool-ref.agent.json",
+        "semantic-reject/duplicate-context-ref.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-DUP-SKILL",
+      "section": "6",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "json_reader",
+      "fixture": [
+        "json_reader/duplicate-json-key.raw"
+      ],
+      "supporting_checks": [
+        "json_reader duplicate-key"
+      ],
+      "notes": "Duplicate Skill map keys fail SRC-JSON-DUP. No separate Skill-id fixture required.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-DUP-SYSTEM",
+      "section": "6",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Registry provenance, not a Source tree fixture.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-REF-FILENAME",
+      "section": "6",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/valid/filename-id-mismatch/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-ID-AUTH",
+      "section": "6",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Identity principle. Filename-vs-id warn is SRC-REF-FILENAME.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-REF-LAYOUT",
+      "section": "6",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Recommended layout is not accept/reject.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-REF-MCP-PHASE",
+      "section": "6",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Phase A/B allowlist is Space model. Skill allowlist refuse is SRC-MCP-SKILL-REF.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-REF-SKILL",
+      "section": "6",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "filesystem",
+      "fixture": [
+        "trees/invalid/unknown-skill/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-REF-SOP",
+      "section": "6",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/sop-wrong-suffix.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Required sop + SRC-MD-SOP. Covered by suffix reject fixture.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-APPROVAL",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/approval-on-boundary.agent.json",
+        "valid/approval-always.agent.json",
+        "valid/approval-never.agent.json",
+        "invalid/approval-on-first-use.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-CLOSED",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/permission-unknown-field.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Closed nested field set. Same fixtures as SRC-SEC-UNKNOWN.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-EXT",
+      "section": "10",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/root-extensions-preserved.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Bag is legal Source. Must not weaken core three axes — Evaluate ignores the bag. Register does not parse vendor JSON.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-FS",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/filesystem-read-only.agent.json",
+        "valid/filesystem-no-access.agent.json",
+        "invalid/permission-duplicate-scope.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-INTENT",
+      "section": "10",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Intent ≠ Host enforcement. Non-behavioral reminder.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-SEC-NET",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/network-deny.agent.json",
+        "valid/network-allow.agent.json"
+      ],
+      "supporting_checks": [
+        "omit fill is SRC-SEC-OMIT"
+      ],
+      "notes": "network.default enum deny|allow is Schema-executed. Omitted → deny is SRC-SEC-OMIT fill.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-OMIT",
+      "section": "10",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "normalize",
+      "fixture": [
+        "normalize/omit-all.agent.json",
+        "normalize/empty-objects.agent.json",
+        "normalize/partial-fields.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv schema-ok. Fill comparison is semantic (expected-baseline-security.json).",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-PRESENT",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/security-wrong-type.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-READ-SCOPE",
+      "section": "10",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Read scopes user data only; runtime baseline is adapter-composed; deny overlays are not a strict read ceiling.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-SEC-SANDBOX",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/sandbox-optional.agent.json",
+        "valid/sandbox-required-read-only.agent.json",
+        "invalid/sandbox-danger-full-access.agent.json",
+        "invalid/security-wrong-type.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-SANDBOX-GATE",
+      "section": "10",
+      "contract_status": "excluded",
+      "required_row": false,
+      "validation_layer": "evaluate",
+      "fixture": [
+        "evaluate/sandbox-required-false-must-not-refuse.expected.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Evaluate algebra. Excluded from Source Freeze.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-TOKEN",
+      "section": "10",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Meaning of working_directory (Runtime ApprovedWorkingDirectory). Token legality is SRC-SEC-TOKEN-REJECT.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-SEC-TOKEN-REJECT",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/permission-source-glob.agent.json",
+        "invalid/permission-unknown-scope.agent.json",
+        "invalid/permission-host-absolute-path.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-UNKNOWN",
+      "section": "10",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/permission-unknown-field.agent.json",
+        "invalid/host-native-security-field.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SEC-WIDER",
+      "section": "10",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Legal Source may exceed a Host grant-set. Evaluate, not register.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-SECRET-DUP",
+      "section": "9",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "semantic",
+      "fixture": [
+        "semantic-reject/duplicate-secret-target.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-ENV",
+      "section": "9",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/secret-empty-env-name.agent.json",
+        "invalid/secret-invalid-env-name.agent.json",
+        "valid/secret-agent-environment.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-PLACEMENT",
+      "section": "9",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/secret-mcp-consumer.agent.json",
+        "valid/secret-hook-consumer.agent.json",
+        "trees/valid/club-system/"
+      ],
+      "supporting_checks": [],
+      "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-PROVIDERS",
+      "section": "9",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/secret-unknown-provider.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "V0 allows only value_from.environment. Same fixture as SRC-SECRET-SHAPE.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-REPORT",
+      "section": "9",
+      "contract_status": "catalog_only",
+      "required_row": true,
+      "validation_layer": "expected_identity",
+      "fixture": [
+        "trees/valid/club-system/expected.json"
+      ],
+      "supporting_checks": [
+        "Report emit excluded from Source Freeze"
+      ],
+      "notes": "Binding-level consumer+target identity is catalogued. Report emit is Evaluate — supporting check excluded from Source Freeze.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-RESOLVE",
+      "section": "9",
+      "contract_status": "excluded",
+      "required_row": false,
+      "validation_layer": "runtime",
+      "fixture": [
+        "runtime/optional-secret-unset.expected.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Runtime truth table. Register validates shape only. Excluded from Source Freeze.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-SHAPE",
+      "section": "9",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/secret-literal-value.agent.json",
+        "invalid/secret-unknown-provider.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-SECRET-VALUE",
+      "section": "9",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Persistence prohibition for resolved secrets. Not a Source JSON instance check.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VAL-CONTRACT-FREEZE",
+      "section": "0",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "freeze_gate",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Catalog entry; does not require Go. Does not unlock stable check/run.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-VAL-DRAFT",
+      "section": "12",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Meta: handwritten Go may implement schema rules until SRC-VAL-IMPL. Published snapshot is v1alpha1/.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VAL-IMPL",
+      "section": "0",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "impl_gate",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Production-parser gate after freeze. Go tests required for that claim only.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-VAL-LAYERS",
+      "section": "12",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Schema vs semantic implication rules. Go equality is SRC-VAL-IMPL.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VAL-REF",
+      "section": "12",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Reference validator is Ajv 8. This harness is that check.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VAL-SCHEMA",
+      "section": "12",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "meta",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Layer definition. Proven by the Schema fixture suite as a whole.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VAL-SEMANTIC",
+      "section": "12",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "meta",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Layer definition. Proven by semantic-reject / trees expected sidecars as a whole.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VERSION-DRAFT",
+      "section": "3",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "terminology",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Meta: retired draft directory. Published snapshot is schemas/source/v1alpha1/. Not an instance accept/reject rule.",
+      "in_markdown_table": false
+    },
+    {
+      "rule_id": "SRC-VERSION-EXT",
+      "section": "3",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "valid/root-extensions-preserved.agent.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-VERSION-EXT-WHERE",
+      "section": "3",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/nested-extensions-on-sandbox.agent.json"
+      ],
+      "supporting_checks": [
+        "valid/root-extensions-preserved.agent.json"
+      ],
+      "notes": "extensions on nested sandbox fails Schema (additionalProperties: false). Root bag remains legal.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-VERSION-KIND",
+      "section": "3",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/kind-wrong.agent.json",
+        "system/invalid/kind-wrong.system.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-VERSION-NS",
+      "section": "3",
+      "contract_status": "executed",
+      "required_row": true,
+      "validation_layer": "schema",
+      "fixture": [
+        "invalid/schema-version.agent.json",
+        "system/invalid/schema-version.system.json"
+      ],
+      "supporting_checks": [],
+      "notes": "Ajv 8 or json_reader harness rejects/accepts this rule.",
+      "in_markdown_table": true
+    },
+    {
+      "rule_id": "SRC-VERSION-SNAP",
+      "section": "3",
+      "contract_status": "not_applicable",
+      "required_row": false,
+      "validation_layer": "contract_note",
+      "fixture": [],
+      "supporting_checks": [],
+      "notes": "Process rule: published snapshot must not silently change Source interpretation. Proven by freeze re-run after $id switch, not an instance fixture.",
+      "in_markdown_table": true
+    }
+  ]
+}

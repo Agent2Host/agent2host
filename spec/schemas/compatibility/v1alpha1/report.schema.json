@@ -1,0 +1,541 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent2host:schema:compatibility-report:v1alpha1:report",
+  "title": "Agent2Host Compatibility Report (v1alpha1)",
+  "description": "Published Schema for schema_version agent2host/compatibility-report/v1alpha1. CMP-VAL-CONTRACT-FREEZE holds. Encodes CMP-EVAL-REASON-INSTANCE (requirement_result ≠ satisfied → reason_code required). MUST NOT encode reason_code → requirement_result (CMP-EVAL-REASON-AXIS).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "agent2host_version",
+    "subject",
+    "host",
+    "adapter",
+    "probe",
+    "decision",
+    "activation",
+    "capabilities",
+    "security"
+  ],
+  "properties": {
+    "schema_version": { "const": "agent2host/compatibility-report/v1alpha1" },
+    "agent2host_version": { "type": "string", "minLength": 1 },
+    "subject": { "$ref": "#/$defs/subject" },
+    "host": { "$ref": "#/$defs/host" },
+    "adapter": { "$ref": "#/$defs/adapter" },
+    "probe": { "$ref": "#/$defs/probe" },
+    "decision": { "type": "string", "enum": ["allowed", "allowed_with_warnings", "refused"] },
+    "activation": { "$ref": "#/$defs/activation" },
+    "capabilities": { "$ref": "#/$defs/capabilities" },
+    "security": { "$ref": "#/$defs/security" }
+  },
+  "$defs": {
+    "local_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 63,
+      "pattern": "^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Artifact revision: sha256: plus lowercase hex of SHA-256."
+    },
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "insufficient_evidence",
+        "acceptance_failed",
+        "mapped_activation",
+        "isolation_too_broad",
+        "permission_overgrant",
+        "approval_weaker",
+        "approval_stricter",
+        "parent_omitted",
+        "activation_not_primary",
+        "sop_not_primary",
+        "server_not_connected",
+        "confidence_inferred",
+        "visible_loss",
+        "sandbox_stricter",
+        "secret_scope_too_broad"
+      ]
+    },
+    "requirement_result": {
+      "type": "string",
+      "enum": ["satisfied", "degraded", "unsatisfied", "unknown"]
+    },
+    "disposition": { "type": "string", "enum": ["include", "omit"] },
+    "support": {
+      "type": "string",
+      "enum": ["native", "mapped", "approximate", "unsupported", "unknown"]
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["agent", "project", "user", "host", "unknown"]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["verified", "documented", "inferred", "unknown"]
+    },
+    "enforcement": {
+      "type": "string",
+      "enum": ["host_enforced", "agent2host_enforced", "prompt_only", "none", "unknown"]
+    },
+    "support_confidence": {
+      "description": "Legal Assess pairs. Not a reason_code-to-class rule.",
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": { "support": { "const": "unknown" } },
+            "required": ["support"]
+          },
+          "then": {
+            "type": "object",
+            "properties": { "confidence": { "const": "unknown" } },
+            "required": ["confidence"]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "support": { "enum": ["native", "mapped", "approximate", "unsupported"] }
+            },
+            "required": ["support"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "confidence": { "enum": ["verified", "documented", "inferred"] }
+            },
+            "required": ["confidence"]
+          }
+        }
+      ]
+    },
+    "instance_reason": {
+      "description": "CMP-EVAL-REASON-INSTANCE: result → code. Do not invert.",
+      "if": {
+        "type": "object",
+        "properties": {
+          "requirement_result": { "enum": ["degraded", "unsatisfied", "unknown"] }
+        },
+        "required": ["requirement_result"]
+      },
+      "then": {
+        "type": "object",
+        "required": ["reason_code"],
+        "properties": {
+          "reason_code": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_id", "agent_id", "revision"],
+      "properties": {
+        "system_id": { "$ref": "#/$defs/local_id" },
+        "agent_id": { "$ref": "#/$defs/local_id" },
+        "revision": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "$ref": "#/$defs/local_id" },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "$ref": "#/$defs/local_id" },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint"],
+      "properties": {
+        "fingerprint": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "confidence", "requirement_result"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["primary_native", "primary_mapped", "subagent_only", "unsupported", "unknown"]
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [{ "$ref": "#/$defs/instance_reason" }]
+    },
+    "ordinary_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["support", "scope", "confidence", "requirement_result", "disposition"],
+      "properties": {
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "policy_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["support", "scope", "enforcement", "confidence", "requirement_result"],
+      "properties": {
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "enforcement": { "$ref": "#/$defs/enforcement" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "collection_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "satisfied",
+        "degraded",
+        "unsatisfied",
+        "unknown",
+        "included",
+        "omitted",
+        "decision_impact"
+      ],
+      "properties": {
+        "satisfied": { "type": "integer", "minimum": 0 },
+        "degraded": { "type": "integer", "minimum": 0 },
+        "unsatisfied": { "type": "integer", "minimum": 0 },
+        "unknown": { "type": "integer", "minimum": 0 },
+        "included": { "type": "integer", "minimum": 0 },
+        "omitted": { "type": "integer", "minimum": 0 },
+        "decision_impact": { "type": "string", "enum": ["refuse", "warning", "pass"] }
+      }
+    },
+    "skill_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "required",
+        "support",
+        "scope",
+        "confidence",
+        "requirement_result",
+        "disposition"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/local_id" },
+        "required": { "type": "boolean" },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "context_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "required",
+        "loading",
+        "isolation",
+        "support",
+        "scope",
+        "confidence",
+        "requirement_result",
+        "disposition"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "loading": { "type": "string", "const": "on_demand" },
+        "isolation": { "type": "string", "enum": ["required", "best_effort", "none"] },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "mcp_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "server_id",
+        "name",
+        "required",
+        "support",
+        "scope",
+        "confidence",
+        "requirement_result",
+        "disposition"
+      ],
+      "properties": {
+        "server_id": { "$ref": "#/$defs/local_id" },
+        "name": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "hook_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "required",
+        "support",
+        "scope",
+        "confidence",
+        "requirement_result",
+        "disposition"
+      ],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "context_isolation_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "required",
+        "support",
+        "scope",
+        "enforcement",
+        "confidence",
+        "requirement_result"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "enforcement": { "$ref": "#/$defs/enforcement" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "mcp_isolation_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "server_id",
+        "support",
+        "scope",
+        "enforcement",
+        "confidence",
+        "requirement_result"
+      ],
+      "properties": {
+        "server_id": { "$ref": "#/$defs/local_id" },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "enforcement": { "$ref": "#/$defs/enforcement" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "secret_isolation_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer",
+        "target",
+        "required",
+        "support",
+        "scope",
+        "enforcement",
+        "confidence",
+        "requirement_result"
+      ],
+      "properties": {
+        "consumer": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "consumer_kind": { "type": "string", "minLength": 1 },
+        "server_id": { "$ref": "#/$defs/local_id" },
+        "required": { "type": "boolean" },
+        "support": { "$ref": "#/$defs/support" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "enforcement": { "$ref": "#/$defs/enforcement" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "requirement_result": { "$ref": "#/$defs/requirement_result" },
+        "reason_code": { "$ref": "#/$defs/reason_code" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/support_confidence" },
+        { "$ref": "#/$defs/instance_reason" }
+      ]
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sop"],
+      "properties": {
+        "sop": { "$ref": "#/$defs/ordinary_row" },
+        "skills": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/skill_item" }
+            },
+            "summary": { "$ref": "#/$defs/collection_summary" }
+          }
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/context_item" }
+            },
+            "summary": { "$ref": "#/$defs/collection_summary" }
+          }
+        },
+        "mcp": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/mcp_item" }
+            },
+            "summary": { "$ref": "#/$defs/collection_summary" }
+          }
+        },
+        "hooks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/hook_item" }
+            },
+            "summary": { "$ref": "#/$defs/collection_summary" }
+          }
+        },
+        "output_schema": { "$ref": "#/$defs/ordinary_row" }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["permissions", "approvals", "sandbox"],
+      "properties": {
+        "permissions": { "$ref": "#/$defs/policy_row" },
+        "approvals": { "$ref": "#/$defs/policy_row" },
+        "sandbox": { "$ref": "#/$defs/policy_row" },
+        "context_isolation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/context_isolation_item" }
+            }
+          }
+        },
+        "mcp_tool_isolation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/mcp_isolation_item" }
+            }
+          }
+        },
+        "output_validation": { "$ref": "#/$defs/policy_row" },
+        "secret_isolation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/secret_isolation_item" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

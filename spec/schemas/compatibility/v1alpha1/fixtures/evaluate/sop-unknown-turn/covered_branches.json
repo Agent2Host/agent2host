@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sop.unknown-turn",
+      "rule_id": "CMP-EVAL-SOP",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/capabilities/sop",
+      "requirement_result": "unknown"
+    }
+  ]
+}

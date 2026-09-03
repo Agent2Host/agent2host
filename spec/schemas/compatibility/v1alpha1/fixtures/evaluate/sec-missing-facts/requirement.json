@@ -1,0 +1,10 @@
+{
+  "security": {
+    "permissions": {
+      "required": true
+    },
+    "approvals": {
+      "required": true
+    }
+  }
+}

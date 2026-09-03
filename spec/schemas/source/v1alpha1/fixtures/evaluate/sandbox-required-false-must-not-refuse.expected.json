@@ -1,0 +1,8 @@
+{
+  "decision": "must_not_refuse_on_sandbox_row",
+  "when": "sandbox.required is false",
+  "rule_id": "SRC-SEC-SANDBOX-GATE",
+  "validation_layer": "evaluate",
+  "go_test": "planned",
+  "notes": "Absent or looser Host sandbox MUST NOT refuse this row. Permissions ceiling and approvals floor still apply. Host adapters later."
+}

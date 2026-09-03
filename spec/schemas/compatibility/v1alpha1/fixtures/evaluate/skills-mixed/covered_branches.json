@@ -1,0 +1,67 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sk.min-req",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/skills/items/0",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.sk.parent-omit",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "reason_code": "parent_omitted",
+      "item_locator": "/capabilities/skills/items/1",
+      "requirement_result": "unsatisfied"
+    },
+    {
+      "branch_id": "br.approx.skill",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "visible_loss",
+      "item_locator": "/capabilities/skills/items/2",
+      "requirement_result": "degraded"
+    },
+    {
+      "branch_id": "br.facts.req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/capabilities/skills/items/3",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.conf.ord-req-inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "confidence_inferred",
+      "item_locator": "/capabilities/skills/items/4",
+      "requirement_result": "degraded"
+    },
+    {
+      "branch_id": "br.conf.opt-inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "confidence_inferred",
+      "item_locator": "/capabilities/skills/items/5",
+      "requirement_result": "degraded"
+    },
+    {
+      "branch_id": "br.conf.ord-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/capabilities/skills/items/6",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.conf.opt-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/capabilities/skills/items/7",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.sk.min-opt",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/capabilities/skills/items/8",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

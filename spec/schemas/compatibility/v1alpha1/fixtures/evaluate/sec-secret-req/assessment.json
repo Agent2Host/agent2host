@@ -1,0 +1,41 @@
+{
+  "secret_isolation": [
+    {
+      "consumer": "/mcp_servers/club-database",
+      "target": "CLUB_DB_TOKEN",
+      "consumer_kind": "mcp_server",
+      "server_id": "club-database",
+      "required": true,
+      "support": "mapped",
+      "scope": "host",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  ],
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  }
+}

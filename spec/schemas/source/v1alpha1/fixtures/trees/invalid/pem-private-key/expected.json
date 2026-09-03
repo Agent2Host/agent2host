@@ -1,0 +1,6 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-CONTENT-PRIVATE-KEY",
+  "go_test": "planned"
+}

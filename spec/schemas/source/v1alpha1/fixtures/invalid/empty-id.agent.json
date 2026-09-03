@@ -1,0 +1,6 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "",
+  "sop": "./sops/demo.sop.md"
+}

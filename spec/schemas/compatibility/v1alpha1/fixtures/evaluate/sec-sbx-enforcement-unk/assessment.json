@@ -1,0 +1,28 @@
+{
+  "security": {
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "unknown",
+      "confidence": "inferred"
+    },
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.out-req",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/security/output_validation",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

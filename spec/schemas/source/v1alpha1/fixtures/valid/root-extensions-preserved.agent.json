@@ -1,0 +1,14 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md",
+  "extensions": {
+    "vendor.example/codex": {
+      "profile": "enterprise-safe"
+    }
+  },
+  "sandbox": {
+    "required": false
+  }
+}

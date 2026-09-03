@@ -1,0 +1,7 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-MCP-SKILL-REF",
+  "go_test": "planned",
+  "notes": "Phase B: Skill mcp_tools server is absent from Agent mcp_servers."
+}

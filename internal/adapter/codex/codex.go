@@ -1,0 +1,242 @@
+package codex
+
+import (
+	"strings"
+
+	"github.com/agent2host/agent2host/internal/adapter"
+	"github.com/agent2host/agent2host/internal/compatibility"
+	"github.com/agent2host/agent2host/internal/space"
+)
+
+// Codex Adapter dictionary (not Source). Isolation roots per run:
+//
+//	$A2H_PRIVATE/codex-home/   == CODEX_HOME (secrets; NOT --add-dir)
+//	  auth.json                     // opaque blob from Auth Profile at Execute
+//	  config.toml                   // this-run developer_instructions, mcp, permissions
+//	  AGENTS.md                     // SOP mirror (instruction chain)
+//	  skills/<id>/SKILL.md          // Codex only scans cwd + CODEX_HOME for skills
+//	$A2H_AUTH_PROFILE/         // durable opaque auth.json only
+//	$A2H_WORKSPACE/            // --add-dir surface only
+//	  AGENTS.md, mcp scripts, contexts
+//
+// Login: adapter declares an opaque auth.json bind. Runtime does not parse it
+// or import ~/.codex. Do not write user Codex config.
+const (
+	HomeDirRel   = "codex-home"
+	ConfigRel    = HomeDirRel + "/config.toml"
+	AgentsRel    = HomeDirRel + "/AGENTS.md"
+	SkillsDirRel = HomeDirRel + "/skills"
+	EnvHome      = "CODEX_HOME"
+)
+
+func Intent(run *space.ResolvedAgentRun, probe adapter.ProbeResult) adapter.ControlIntent {
+	if run == nil || !probe.Found {
+		return adapter.ControlIntent{}
+	}
+	var c adapter.ControlIntent
+	c.Controls = []adapter.PlannedControl{
+		{Kind: adapter.ControlSandbox, Via: adapter.ViaProjectionFile, Rel: ConfigRel, Derivation: "codex: config.toml permissions.a2h filesystem+network"},
+		{Kind: adapter.ControlPermissions, Via: adapter.ViaProjectionFile, Rel: ConfigRel, Derivation: "codex: config.toml default_permissions profile"},
+		{Kind: adapter.ControlApprovals, Via: adapter.ViaLaunchArg, Rel: "--ask-for-approval", Derivation: "codex: --ask-for-approval on_boundary|always|never"},
+		{Kind: adapter.ControlIsolation, Via: adapter.ViaNamedConfig, Rel: EnvHome, Derivation: "codex: CODEX_HOME run-private codex-home"},
+	}
+	adapter.AppendEnvironmentSecrets(&c, run)
+	for _, sid := range adapter.SortedMCPServerIDs(run) {
+		c.Controls = append(c.Controls, adapter.PlannedControl{
+			Kind: adapter.ControlMCP, ID: sid, Via: adapter.ViaProjectionFile, Rel: ConfigRel,
+			Derivation: "codex: config.toml mcp_servers env",
+		})
+	}
+	adapter.AppendMCPSecrets(&c, run)
+	if run.Hooks != nil {
+		c.Controls = append(c.Controls, adapter.PlannedControl{
+			Kind: adapter.ControlHook, Via: adapter.ViaProjectionFile, Rel: ConfigRel,
+			Derivation: "codex: config.toml hooks (approximate; visible_loss warning)",
+		})
+		adapter.AppendHookSecrets(&c, run)
+	}
+	return c
+}
+
+func projectCodex(run *space.ResolvedAgentRun, report compatibility.Report, files []adapter.ProjectionFile, lp adapter.LaunchPlan) ([]adapter.ProjectionFile, adapter.LaunchPlan) {
+	sop := ""
+	for _, f := range files {
+		if f.RelPath == "AGENTS.md" || strings.HasSuffix(f.RelPath, "/AGENTS.md") {
+			sop = string(f.Content)
+			break
+		}
+	}
+	if sop == "" {
+		sop = string(adapter.CopyContent(run, run.SOP))
+	}
+	sop = string(adapter.WrapNamedAgentSOP(run, []byte(sop)))
+	cfg, extras := codexConfigTOML(run, report, sop)
+	files = append(files, extras...)
+	files = append(files, adapter.ProjectionFile{
+		RelPath: ConfigRel, Class: adapter.DestHostPrivate, Content: cfg, FromContent: "adapter:codex-config",
+	})
+	files = append(files, adapter.ProjectionFile{
+		RelPath: AgentsRel, Class: adapter.DestHostPrivate, Content: []byte(sop), FromContent: run.SOP,
+	})
+
+	approval := ApprovalFlag(run)
+	// Do not pass --sandbox: that flag selects the legacy sandbox_mode model
+	// and ignores default_permissions. The permission profile lives in CODEX_HOME/config.toml.
+	// --add-dir is workspace only (skills / MCP scripts). CODEX_HOME stays private.
+	args := []string{
+		"--disable", "apps",
+		"--ask-for-approval", approval,
+		"--add-dir", adapter.WorkspaceToken,
+	}
+	lp.Args = args
+	if lp.Env == nil {
+		lp.Env = map[string]string{}
+	}
+	lp.Env[EnvHome] = adapter.PrivateToken + "/" + HomeDirRel
+	lp.WorkingDirClass = adapter.DestWorkingDir
+	return files, lp
+}
+
+func codexSandboxFlag(run *space.ResolvedAgentRun) string {
+	mode := "workspace-write"
+	if run != nil && run.Sandbox != nil && run.Sandbox.Mode != nil {
+		switch *run.Sandbox.Mode {
+		case "read_only":
+			mode = "read-only"
+		case "workspace_write":
+			mode = "workspace-write"
+		}
+	}
+	return mode
+}
+
+func ApprovalFlag(run *space.ResolvedAgentRun) string {
+	shell := "on_boundary"
+	if run != nil && run.Approvals != nil && run.Approvals.ShellExecute != nil {
+		shell = *run.Approvals.ShellExecute
+	}
+	switch shell {
+	case "never":
+		return "never"
+	case "always":
+		// Codex has no exact "always ask"; on-request is the honest ask floor.
+		return "on-request"
+	default:
+		return "on-request"
+	}
+}
+
+func codexConfigTOML(run *space.ResolvedAgentRun, report compatibility.Report, sop string) ([]byte, []adapter.ProjectionFile) {
+	var b strings.Builder
+	var extras []adapter.ProjectionFile
+	b.WriteString("# Generated by Agent2Host Codex Adapter — not Source of Truth.\n")
+	b.WriteString("# Hermetic session: disable global Apps MCP; only projected servers below.\n")
+	// Use dotted keys. A [features] table header would own every following
+	// key until the next [table], which broke developer_instructions (Codex
+	// expected features.* to be booleans).
+	b.WriteString("features.apps = false\n")
+	b.WriteString("developer_instructions = ")
+	b.WriteString(adapter.QuoteTOMLString(sop))
+	b.WriteByte('\n')
+	b.WriteString("approval_policy = ")
+	b.WriteString(adapter.QuoteTOMLString(ApprovalFlag(run)))
+	b.WriteByte('\n')
+	b.WriteString("default_permissions = ")
+	b.WriteString(adapter.QuoteTOMLString(codexPermissionProfileName))
+	b.WriteByte('\n')
+	b.WriteString(codexPermissionProfileTOML(run))
+	b.WriteString("# Hooks: Agent2Host events are not yet projected into Codex hook TOML (approximate).\n")
+
+	for _, sid := range adapter.IncludedMCPServerIDs(run, report) {
+		srv := run.MCPServers[sid]
+		packed := adapter.PackedFilesFromMCP(srv.Files)
+		cmd, args := adapter.BindWorkspaceArgv(srv.Command, srv.Args, packed)
+		b.WriteString("\n[mcp_servers.")
+		b.WriteString(sid)
+		b.WriteString("]\n")
+		b.WriteString("command = ")
+		b.WriteString(adapter.QuoteTOMLString(cmd))
+		b.WriteByte('\n')
+		if len(args) > 0 {
+			b.WriteString("args = [")
+			for i, a := range args {
+				if i > 0 {
+					b.WriteString(", ")
+				}
+				b.WriteString(adapter.QuoteTOMLString(a))
+			}
+			b.WriteString("]\n")
+		}
+		b.WriteString("startup_timeout_sec = 60\n")
+		if len(srv.Tools) > 0 {
+			b.WriteString("enabled_tools = [")
+			for i, t := range srv.Tools {
+				if i > 0 {
+					b.WriteString(", ")
+				}
+				b.WriteString(adapter.QuoteTOMLString(t.Name))
+			}
+			b.WriteString("]\n")
+		}
+		if len(srv.Environment) > 0 {
+			b.WriteString("\n[mcp_servers.")
+			b.WriteString(sid)
+			b.WriteString(".env]\n")
+			for _, e := range srv.Environment {
+				b.WriteString(e.ValueFrom.Environment)
+				b.WriteString(" = ")
+				b.WriteString(adapter.QuoteTOMLString(adapter.SecretPlaceholder(e.ValueFrom.Environment)))
+				b.WriteByte('\n')
+			}
+		}
+		for _, f := range srv.Files {
+			extras = append(extras, adapter.File(f, run, f, nil))
+		}
+	}
+
+	return []byte(b.String()), extras
+}
+
+const codexPermissionProfileName = "a2h"
+
+// codexPermissionProfileTOML is the permission-profile model (Codex 0.138.0+).
+// It is mutually exclusive with sandbox_mode / [sandbox_workspace_write].
+// Do not set :root deny: Codex TUI bootstraps by sandbox-exec of its own
+// binary, and that helper cannot start under a root deny (operator-confirmed
+// 2026-09-01, system Terminal + empty cwd). Workspace write/read follow
+// Codex defaults plus :workspace_roots. StrictReadEnforced stays false.
+func codexPermissionProfileTOML(run *space.ResolvedAgentRun) string {
+	var b strings.Builder
+	b.WriteString("\n[permissions.")
+	b.WriteString(codexPermissionProfileName)
+	b.WriteString("]\n")
+	b.WriteString("description = \"Agent2Host per-run Codex permission profile\"\n")
+	b.WriteString("extends = \":read-only\"\n")
+	b.WriteString("\n[permissions.")
+	b.WriteString(codexPermissionProfileName)
+	b.WriteString(".filesystem]\n")
+	b.WriteString("\":minimal\" = \"read\"\n")
+	b.WriteString("\":workspace_roots\" = ")
+	b.WriteString(adapter.QuoteTOMLString(codexWorkspaceFSAccess(run)))
+	b.WriteByte('\n')
+	b.WriteString("\n[permissions.")
+	b.WriteString(codexPermissionProfileName)
+	b.WriteString(".network]\n")
+	if adapter.NetworkDenied(run) {
+		b.WriteString("enabled = false\n")
+	} else {
+		b.WriteString("enabled = true\n")
+		b.WriteString("mode = \"full\"\n")
+	}
+	return b.String()
+}
+
+func codexWorkspaceFSAccess(run *space.ResolvedAgentRun) string {
+	if !adapter.FSReadAllowed(run) {
+		return "deny"
+	}
+	if !adapter.FSWriteAllowed(run) || codexSandboxFlag(run) == "read-only" {
+		return "read"
+	}
+	return "write"
+}

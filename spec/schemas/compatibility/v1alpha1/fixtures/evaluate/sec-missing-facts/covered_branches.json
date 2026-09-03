@@ -1,0 +1,32 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.conf.sec-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/security/permissions",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.conf.sec-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/security/approvals",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.sec.sbx-enforcement-unk",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/security/sandbox",
+      "requirement_result": "unknown"
+    },
+    {
+      "branch_id": "br.conf.sec-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "insufficient_evidence",
+      "item_locator": "/security/output_validation",
+      "requirement_result": "unknown"
+    }
+  ]
+}

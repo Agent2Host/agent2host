@@ -1,0 +1,31 @@
+[
+  {
+    "file": "duplicate-json-key.raw",
+    "rule_id": "SRC-JSON-DUP",
+    "expect": "invalid",
+    "validation_layer": "json_reader",
+    "go_test": "planned"
+  },
+  {
+    "file": "bom-utf8.raw",
+    "rule_id": "SRC-JSON-UTF8",
+    "expect": "invalid",
+    "validation_layer": "json_reader",
+    "go_test": "planned"
+  },
+  {
+    "file": "invalid-utf8.raw",
+    "rule_id": "SRC-JSON-UTF8",
+    "expect": "invalid",
+    "validation_layer": "json_reader",
+    "go_test": "planned"
+  },
+  {
+    "file": "json-syntax-error.raw",
+    "rule_id": "SRC-JSON-SYNTAX",
+    "expect": "invalid",
+    "validation_layer": "json_reader",
+    "go_test": "planned",
+    "notes": "Valid UTF-8, illegal JSON. Parse fails before schema. Distinct from SRC-JSON-UTF8."
+  }
+]

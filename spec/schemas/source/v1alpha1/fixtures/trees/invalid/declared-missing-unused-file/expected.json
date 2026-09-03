@@ -1,0 +1,7 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-PATH-DECLARED",
+  "go_test": "planned",
+  "notes": "tools [] still requires declared files to exist."
+}

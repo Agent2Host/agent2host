@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent2host:schema:source:expected-sidecar-v1",
+  "title": "Agent2Host expected sidecar (structural only)",
+  "description": "Closed shape for catalog-only expected outcomes. Harness validates structure, not register results.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["register", "rule_id"],
+      "properties": {
+        "register": { "type": "string", "const": "fail" },
+        "schema_valid": { "type": "boolean" },
+        "rule_id": { "type": "string", "pattern": "^SRC-[A-Z0-9-]+$" },
+        "warning": { "type": "boolean" },
+        "go_test": { "type": "string", "enum": ["planned"] },
+        "notes": { "type": "string" },
+        "contract_status": { "type": "string", "enum": ["catalog_only"] }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["register"],
+      "properties": {
+        "register": { "type": "string", "const": "success" },
+        "schema_valid": { "type": "boolean" },
+        "rule_id": { "type": "string", "pattern": "^SRC-[A-Z0-9-]+$" },
+        "warning": { "type": "boolean" },
+        "go_test": { "type": "string", "enum": ["planned"] },
+        "notes": { "type": "string" },
+        "contract_status": { "type": "string", "enum": ["catalog_only"] },
+        "secret_isolation_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["consumer", "target"],
+            "properties": {
+              "consumer": { "type": "string", "minLength": 1 },
+              "target": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "assertions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "member_occurrences": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": {
+                "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+              },
+              "additionalProperties": { "type": "integer", "minimum": 1 }
+            },
+            "artifact_member_paths": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+              }
+            },
+            "resolved_skill_ids": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": {
+                "pattern": "^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+                }
+              }
+            },
+            "not_packed_paths": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "register", "validation_layer", "truth_table"],
+      "properties": {
+        "rule_id": { "type": "string", "const": "SRC-SECRET-RESOLVE" },
+        "validation_layer": { "type": "string", "const": "runtime" },
+        "register": { "type": "string", "const": "not_applicable" },
+        "go_test": { "type": "string", "enum": ["planned"] },
+        "notes": { "type": "string" },
+        "truth_table": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["required", "invoking_env", "runtime"],
+            "properties": {
+              "required": { "type": "boolean" },
+              "invoking_env": { "type": "string" },
+              "runtime": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "validation_layer", "decision"],
+      "properties": {
+        "rule_id": { "type": "string", "const": "SRC-SEC-SANDBOX-GATE" },
+        "validation_layer": { "type": "string", "const": "evaluate" },
+        "decision": { "type": "string" },
+        "when": { "type": "string" },
+        "go_test": { "type": "string", "enum": ["planned"] },
+        "notes": { "type": "string" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+Independent RFC 8785 golden for TestRFC8785IndependentGolden.
+
+Input members (raw bytes, then SHA-256):
+  agents/demo.agent.json  {"id":"demo"}
+  system.json             {"ok":true}
+
+files[] sorted by path UTF-8, then the whole manifest object canonicalized.
+
+Computed with Node `canonicalize@2.0.0` (RFC 8785 Appendix G JavaScript
+implementation), not github.com/gowebpki/jcs. Production code must match
+these bytes; tests must not generate the expected value from production.

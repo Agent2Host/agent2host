@@ -1,0 +1,11 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "agent-b",
+  "sop": "./sops/demo.sop.md",
+  "contexts": [
+    {
+      "path": "./contexts/shared.md"
+    }
+  ]
+}

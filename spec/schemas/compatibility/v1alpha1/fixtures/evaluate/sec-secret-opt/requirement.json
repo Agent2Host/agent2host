@@ -1,0 +1,9 @@
+{
+  "secrets": [
+    {
+      "consumer": "/mcp_servers/club-database",
+      "target": "CLUB_DB_TOKEN",
+      "required": false
+    }
+  ]
+}

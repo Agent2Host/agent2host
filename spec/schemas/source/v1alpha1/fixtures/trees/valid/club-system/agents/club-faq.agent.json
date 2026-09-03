@@ -1,0 +1,82 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "club-faq",
+  "name": "Club FAQ",
+  "description": "Club events, registration, and policies.",
+  "sop": "./sops/club-faq.sop.md",
+  "skills": [
+    "search-policy",
+    {
+      "id": "verify-member",
+      "required": false
+    }
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/club-handbook.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    }
+  ],
+  "mcp_servers": {
+    "club-database": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/club-database.py"
+      ],
+      "files": [
+        "./mcp/club-database.py"
+      ],
+      "tools": [
+        "search_policy",
+        "get_member"
+      ],
+      "environment": [
+        {
+          "value_from": {
+            "environment": "CLUB_DB_TOKEN"
+          },
+          "required": true
+        },
+        {
+          "value_from": {
+            "environment": "CLUB_DB_READONLY"
+          },
+          "required": false
+        }
+      ]
+    }
+  },
+  "hooks": {
+    "before_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/validate-tool-call.py"
+        ],
+        "files": [
+          "./hooks/validate-tool-call.py"
+        ],
+        "environment": [
+          {
+            "value_from": {
+              "environment": "AUDIT_TOKEN"
+            },
+            "required": true
+          }
+        ]
+      }
+    ]
+  },
+  "environment": [
+    {
+      "value_from": {
+        "environment": "OPENAI_API_KEY"
+      },
+      "required": false
+    }
+  ]
+}

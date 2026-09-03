@@ -1,0 +1,7 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-PATH-DOT",
+  "go_test": "planned",
+  "notes": "After stripping one leading ./, an interior . segment is illegal. Do not lexically collapse."
+}

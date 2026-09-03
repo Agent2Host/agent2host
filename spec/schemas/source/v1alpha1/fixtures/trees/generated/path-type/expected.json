@@ -1,0 +1,6 @@
+{
+  "rule_id": "SRC-PATH-TYPE",
+  "register": "fail",
+  "go_test": "planned",
+  "notes": "Every constructed non-regular file or symlink candidate fails SRC-PATH-TYPE. Device is synthetic metadata only."
+}

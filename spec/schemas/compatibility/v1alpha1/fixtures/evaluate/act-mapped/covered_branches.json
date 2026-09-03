@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.act.mapped",
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "reason_code": "mapped_activation",
+      "item_locator": "/activation",
+      "requirement_result": "degraded"
+    }
+  ]
+}

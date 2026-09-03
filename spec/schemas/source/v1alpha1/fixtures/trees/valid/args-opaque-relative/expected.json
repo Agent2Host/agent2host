@@ -1,0 +1,9 @@
+{
+  "register": "success",
+  "rule_id": "SRC-ARGV-ARGS",
+  "go_test": "planned",
+  "notes": "Opaque args token hooks/a.py is not a Source path; files is empty; not packed.",
+  "assertions": {
+    "not_packed_paths": ["hooks/a.py"]
+  }
+}

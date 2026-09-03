@@ -1,0 +1,15 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md",
+  "permissions": {
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {},
+  "sandbox": {
+    "mode": "workspace_write"
+  }
+}

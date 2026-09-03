@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.perm-over",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "permission_overgrant",
+      "item_locator": "/security/permissions",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

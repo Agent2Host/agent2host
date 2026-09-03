@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sop.not-primary",
+      "rule_id": "CMP-EVAL-SOP",
+      "reason_code": "sop_not_primary",
+      "item_locator": "/capabilities/sop",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

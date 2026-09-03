@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent2host:schema:artifact:agent2host-system-v1",
+  "title": "Agent2Host Canonical System Artifact manifest (agent2host-system-v1)",
+  "description": "Manifest object hashed with RFC 8785. File paths are portable, declared Source members.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["digest_format", "files"],
+  "properties": {
+    "digest_format": { "type": "string", "const": "agent2host-system-v1" },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "contains": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "const": "system.json" }
+        }
+      },
+      "minContains": 1,
+      "maxContains": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256", "type"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:[A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9._-]|\\.[A-Za-z0-9_-]|[A-Za-z0-9._-]{3,})(?:/(?:[A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9._-]|\\.[A-Za-z0-9_-]|[A-Za-z0-9._-]{3,}))*$",
+            "description": "Canonical member path after SRC-PATH-CANON (RE2-safe: no leading ./; no . or .. segments). Must match common $defs.canonical_member_path. Collision keys are not stored. uniqueItems does not catch same path with different hashes; semantic validator requires unique sorted canonical paths, unique collision keys, and payload/manifest identity."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "type": { "type": "string", "const": "file" }
+        }
+      }
+    }
+  }
+}

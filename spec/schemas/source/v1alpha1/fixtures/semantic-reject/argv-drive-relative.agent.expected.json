@@ -1,0 +1,6 @@
+{
+  "schema_valid": true,
+  "register": "fail",
+  "rule_id": "SRC-ARGV-COMMAND",
+  "go_test": "planned"
+}

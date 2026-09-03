@@ -1,0 +1,51 @@
+{
+  "hooks": [
+    {
+      "ref": "/hooks/req/0",
+      "required": true,
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented"
+    },
+    {
+      "ref": "/hooks/opt/0",
+      "required": false,
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented"
+    },
+    {
+      "ref": "/hooks/approx/0",
+      "required": true,
+      "support": "approximate",
+      "scope": "agent",
+      "confidence": "documented"
+    }
+  ],
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  }
+}

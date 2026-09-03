@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent2host:schema:source:v1alpha1:common",
+  "title": "Agent2Host Source common definitions (v1alpha1)",
+  "description": "Published agent2host/v1alpha1 common definitions.",
+  "$defs": {
+    "local_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 63,
+      "pattern": "^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+      "description": "SRC-ID-PATTERN. System/Agent/Skill/MCP Server/Host/Adapter ids. Not MCP tool names. Semantic validator also rejects U+000A, U+000D, U+2028, U+2029 (SRC-ID-TERMINATOR); do not rely on $ alone."
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "agent2host/v1alpha1"
+    },
+    "semver": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "description": "SRC-ID-SEMVER. Semantic Version 2.0.0. Official algorithm; non-capturing groups only; no lookahead. ECMA-262 ∩ Go RE2. Single accept set with Go SemVer library (no v-prefix lenient mode)."
+    },
+    "portable_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:\\./)?[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$",
+      "description": "SRC-PATH-* authoring form. Semantic validator strips at most one leading ./, then if the result equals .. or starts with ../ → SRC-PATH-ESCAPE, then remaining empty/. /.. segments → SRC-PATH-DOT, then containment → SRC-PATH-ESCAPE. NFC is not applicable in v1alpha1 (ASCII-only portable_path). Windows reserved names, regular-file type, SRC-PATH-DECLARED, exact-path dedup then collision keys (SRC-PATH-DEDUP / SRC-PATH-COLLIDE). Not the canonical manifest form. Backslash is illegal (not converted). Schema already rejects empty segments (foo//bar)."
+    },
+    "canonical_member_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:[A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9._-]|\\.[A-Za-z0-9_-]|[A-Za-z0-9._-]{3,})(?:/(?:[A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9._-]|\\.[A-Za-z0-9_-]|[A-Za-z0-9._-]{3,}))*$",
+      "description": "SRC-PATH-CANON. RE2-safe: no leading ./; no . or .. segments. Identical pattern in the artifact manifest schema. Go regexp must use this same expression. Semantic validator also rejects U+000A, U+000D, U+2028, U+2029."
+    },
+    "env_var_name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "mcp_tool_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque MCP Tool name. No Agent2Host local_id regex."
+    },
+    "extension_key": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?/[A-Za-z0-9._-]+$"
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/extension_key" },
+      "additionalProperties": true
+    },
+    "environment_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value_from"],
+      "properties": {
+        "value_from": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["environment"],
+          "properties": {
+            "environment": { "$ref": "#/$defs/env_var_name" }
+          }
+        },
+        "required": { "type": "boolean" }
+      }
+    },
+    "mcp_tool_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["server_id", "tool_name"],
+      "properties": {
+        "server_id": { "$ref": "#/$defs/local_id" },
+        "tool_name": { "$ref": "#/$defs/mcp_tool_name" }
+      }
+    },
+    "skill_ref": {
+      "oneOf": [
+        { "$ref": "#/$defs/local_id" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {
+            "id": { "$ref": "#/$defs/local_id" },
+            "required": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "context_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "$ref": "#/$defs/portable_path" },
+        "loading": {
+          "type": "string",
+          "const": "on_demand",
+          "description": "SRC-DEFAULT-LOADING. Omitted → on_demand. V0 legal value is on_demand only."
+        },
+        "isolation": { "type": "string", "enum": ["required", "best_effort", "none"] },
+        "required": { "type": "boolean" }
+      }
+    },
+    "tool_allowlist_entry": {
+      "oneOf": [
+        { "$ref": "#/$defs/mcp_tool_name" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": { "$ref": "#/$defs/mcp_tool_name" },
+            "required": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "hook_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/portable_path" }
+        },
+        "required": { "type": "boolean" },
+        "environment": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/environment_binding" }
+        }
+      }
+    },
+    "mcp_server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transport", "command", "tools"],
+      "properties": {
+        "transport": { "type": "string", "const": "stdio" },
+        "command": { "type": "string", "minLength": 1 },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/portable_path" }
+        },
+        "tools": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tool_allowlist_entry" }
+        },
+        "environment": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/environment_binding" }
+        }
+      }
+    },
+    "skill_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "document"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "document": { "$ref": "#/$defs/portable_path" },
+        "scripts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/portable_path" }
+        },
+        "contexts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/portable_path" }
+        },
+        "assets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/portable_path" }
+        },
+        "mcp_tools": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mcp_tool_ref" }
+        }
+      }
+    },
+    "permission_scope": {
+      "type": "string",
+      "enum": ["working_directory"],
+      "description": "SRC-SEC-TOKEN. Logical ApprovedWorkingDirectory; not a Source path."
+    },
+    "permission_scope_set": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/permission_scope" },
+      "uniqueItems": true,
+      "maxItems": 1
+    },
+    "filesystem_permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "$ref": "#/$defs/permission_scope_set",
+          "default": ["working_directory"]
+        },
+        "write": {
+          "$ref": "#/$defs/permission_scope_set",
+          "default": ["working_directory"]
+        }
+      }
+    },
+    "network_permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": "string",
+          "enum": ["deny", "allow"],
+          "default": "deny"
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "filesystem": { "$ref": "#/$defs/filesystem_permissions" },
+        "network": { "$ref": "#/$defs/network_permissions" }
+      }
+    },
+    "approvals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shell_execute": {
+          "type": "string",
+          "enum": ["always", "on_boundary", "never"],
+          "default": "on_boundary"
+        }
+      }
+    },
+    "sandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": { "type": "boolean", "default": false },
+        "mode": {
+          "type": "string",
+          "enum": ["read_only", "workspace_write"],
+          "default": "workspace_write"
+        }
+      }
+    }
+  }
+}

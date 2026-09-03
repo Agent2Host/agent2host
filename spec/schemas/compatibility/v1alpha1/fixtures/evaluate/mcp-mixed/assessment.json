@@ -1,0 +1,83 @@
+{
+  "mcp": [
+    {
+      "server_id": "srv-tool-req",
+      "name": "t1",
+      "required": true,
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented",
+      "invocable": false
+    },
+    {
+      "server_id": "srv-tool-opt",
+      "name": "t2",
+      "required": false,
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented",
+      "invocable": false
+    },
+    {
+      "server_id": "srv-approx",
+      "name": "t3",
+      "required": true,
+      "support": "approximate",
+      "scope": "agent",
+      "confidence": "documented"
+    },
+    {
+      "server_id": "srv-req",
+      "name": "t4",
+      "required": true,
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented",
+      "server_connected": false
+    },
+    {
+      "server_id": "srv-opt",
+      "name": "t5",
+      "required": false,
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented",
+      "server_connected": false
+    }
+  ],
+  "mcp_tool_isolation": [
+    {
+      "server_id": "srv-iso",
+      "support": "mapped",
+      "scope": "project",
+      "enforcement": "none",
+      "confidence": "documented"
+    }
+  ],
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  }
+}

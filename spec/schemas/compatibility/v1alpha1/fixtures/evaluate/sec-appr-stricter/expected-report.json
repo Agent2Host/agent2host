@@ -1,0 +1,130 @@
+{
+  "schema_version": "agent2host/compatibility-report/v1alpha1",
+  "agent2host_version": "0.0.0-hc040",
+  "subject": {
+    "system_id": "club-system",
+    "agent_id": "club-faq",
+    "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+  },
+  "host": {
+    "id": "codex",
+    "version": "actual-version"
+  },
+  "adapter": {
+    "id": "codex",
+    "version": "0.1.0"
+  },
+  "probe": {
+    "fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000002"
+  },
+  "decision": "allowed_with_warnings",
+  "activation": {
+    "mode": "primary_native",
+    "confidence": "documented",
+    "requirement_result": "satisfied"
+  },
+  "capabilities": {
+    "sop": {
+      "support": "native",
+      "scope": "agent",
+      "confidence": "documented",
+      "requirement_result": "satisfied",
+      "disposition": "include"
+    },
+    "skills": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "context": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "mcp": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "hooks": {
+      "items": [],
+      "summary": {
+        "satisfied": 0,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 0,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "output_schema": {
+      "support": "native",
+      "scope": "agent",
+      "confidence": "documented",
+      "requirement_result": "satisfied",
+      "disposition": "include"
+    }
+  },
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "degraded",
+      "reason_code": "approval_stricter"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "context_isolation": {
+      "items": []
+    },
+    "mcp_tool_isolation": {
+      "items": []
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "secret_isolation": {
+      "items": []
+    }
+  }
+}

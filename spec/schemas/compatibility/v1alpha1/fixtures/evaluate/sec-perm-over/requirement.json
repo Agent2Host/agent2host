@@ -1,0 +1,7 @@
+{
+  "security": {
+    "permissions": {
+      "required": true
+    }
+  }
+}

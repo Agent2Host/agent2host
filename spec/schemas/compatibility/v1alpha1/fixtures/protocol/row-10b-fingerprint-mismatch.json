@@ -1,0 +1,35 @@
+{
+  "case": "10b",
+  "existing_report": {
+    "subject": {
+      "system_id": "club-system",
+      "agent_id": "club-faq",
+      "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "probe": {
+      "fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000009"
+    },
+    "adapter": {
+      "version": "0.1.0"
+    },
+    "agent2host_version": "0.0.0-dev"
+  },
+  "current_binding": {
+    "subject": {
+      "system_id": "club-system",
+      "agent_id": "club-faq",
+      "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "probe": {
+      "fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000002"
+    },
+    "adapter": {
+      "version": "0.1.0"
+    },
+    "agent2host_version": "0.0.0-dev"
+  },
+  "expected": {
+    "reuse": false,
+    "project": false
+  }
+}

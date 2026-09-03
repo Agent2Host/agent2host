@@ -1,0 +1,9 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "AgentSystem",
+  "id": "fm",
+  "version": "1.0.0",
+  "agents": [
+    "./agents/demo.agent.json"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "contexts": [
+    {
+      "path": "contexts/min-req.md",
+      "required": true,
+      "isolation": "required"
+    },
+    {
+      "path": "contexts/min-opt.md",
+      "required": false,
+      "isolation": "required"
+    },
+    {
+      "path": "contexts/approx.md",
+      "required": true,
+      "isolation": "required"
+    },
+    {
+      "path": "contexts/facts-opt.md",
+      "required": false,
+      "isolation": "required"
+    }
+  ]
+}

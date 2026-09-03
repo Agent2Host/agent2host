@@ -1,0 +1,216 @@
+{
+  "schema_version": "agent2host/compatibility-report/v1alpha1",
+  "agent2host_version": "0.0.0-dev",
+  "subject": {
+    "system_id": "club-system",
+    "agent_id": "club-faq",
+    "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "host": {
+    "id": "codex",
+    "version": "actual-version"
+  },
+  "adapter": {
+    "id": "codex",
+    "version": "0.1.0"
+  },
+  "probe": {
+    "fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "decision": "allowed_with_warnings",
+  "activation": {
+    "mode": "primary_mapped",
+    "confidence": "inferred",
+    "requirement_result": "degraded",
+    "reason_code": "not_a_code"
+  },
+  "capabilities": {
+    "sop": {
+      "support": "mapped",
+      "scope": "agent",
+      "confidence": "inferred",
+      "requirement_result": "degraded",
+      "disposition": "include",
+      "reason_code": "confidence_inferred"
+    },
+    "skills": {
+      "items": [
+        {
+          "id": "search-policy",
+          "required": true,
+          "support": "mapped",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "satisfied",
+          "disposition": "include"
+        },
+        {
+          "id": "format-pretty-answer",
+          "required": false,
+          "support": "unsupported",
+          "scope": "unknown",
+          "confidence": "documented",
+          "requirement_result": "unsatisfied",
+          "disposition": "omit",
+          "reason_code": "acceptance_failed"
+        }
+      ],
+      "summary": {
+        "satisfied": 1,
+        "degraded": 0,
+        "unsatisfied": 1,
+        "unknown": 0,
+        "included": 1,
+        "omitted": 1,
+        "decision_impact": "warning"
+      }
+    },
+    "context": {
+      "items": [
+        {
+          "path": "contexts/club-handbook.md",
+          "required": true,
+          "loading": "on_demand",
+          "isolation": "required",
+          "support": "mapped",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "satisfied",
+          "disposition": "include"
+        }
+      ],
+      "summary": {
+        "satisfied": 1,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 1,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "mcp": {
+      "items": [
+        {
+          "server_id": "club-database",
+          "name": "search_policy",
+          "required": true,
+          "support": "native",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "satisfied",
+          "disposition": "include"
+        }
+      ],
+      "summary": {
+        "satisfied": 1,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 1,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "hooks": {
+      "items": [
+        {
+          "ref": "/hooks/before_tool_call/0",
+          "required": true,
+          "support": "mapped",
+          "scope": "agent",
+          "confidence": "documented",
+          "requirement_result": "satisfied",
+          "disposition": "include"
+        }
+      ],
+      "summary": {
+        "satisfied": 1,
+        "degraded": 0,
+        "unsatisfied": 0,
+        "unknown": 0,
+        "included": 1,
+        "omitted": 0,
+        "decision_impact": "pass"
+      }
+    },
+    "output_schema": {
+      "support": "mapped",
+      "scope": "agent",
+      "confidence": "documented",
+      "requirement_result": "satisfied",
+      "disposition": "include"
+    }
+  },
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "context_isolation": {
+      "items": [
+        {
+          "path": "contexts/club-handbook.md",
+          "required": true,
+          "support": "mapped",
+          "scope": "agent",
+          "enforcement": "host_enforced",
+          "confidence": "documented",
+          "requirement_result": "satisfied"
+        }
+      ]
+    },
+    "mcp_tool_isolation": {
+      "items": [
+        {
+          "server_id": "club-database",
+          "support": "mapped",
+          "scope": "agent",
+          "enforcement": "host_enforced",
+          "confidence": "documented",
+          "requirement_result": "satisfied"
+        }
+      ]
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented",
+      "requirement_result": "satisfied"
+    },
+    "secret_isolation": {
+      "items": [
+        {
+          "consumer": "/mcp_servers/club-database",
+          "target": "CLUB_DB_TOKEN",
+          "consumer_kind": "mcp_server",
+          "server_id": "club-database",
+          "required": true,
+          "support": "mapped",
+          "scope": "agent",
+          "enforcement": "host_enforced",
+          "confidence": "documented",
+          "requirement_result": "satisfied"
+        }
+      ]
+    }
+  }
+}

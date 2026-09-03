@@ -1,0 +1,568 @@
+{
+  "schema_version": "agent2host/compatibility-rule-status-v1",
+  "catalog_version": "1",
+  "formula": "rules[].rule_id values are unique; evaluate_branches records fixture coverage",
+  "completeness": {
+    "defined_in_body": 22,
+    "indexed": 22,
+    "missing": 0,
+    "evaluate_branches": 46
+  },
+  "counts": {
+    "executed": 15,
+    "catalog_only": 5,
+    "not_applicable": 2,
+    "excluded": 0,
+    "missing": 0
+  },
+  "rules": [
+    {
+      "rule_id": "CMP-ID-BRANCH",
+      "contract_status": "executed",
+      "notes": "branch_id format/scope; sidecars"
+    },
+    {
+      "rule_id": "CMP-EVAL-REASON-INSTANCE",
+      "contract_status": "executed",
+      "notes": "Schema if/then + corpus"
+    },
+    {
+      "rule_id": "CMP-EVAL-REASON-AXIS",
+      "contract_status": "executed",
+      "notes": "AXIS walker + shape fixtures"
+    },
+    {
+      "rule_id": "CMP-COV-INVENTORY",
+      "contract_status": "executed",
+      "notes": "enum = inventory = schema"
+    },
+    {
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "contract_status": "executed",
+      "notes": "act-* fixtures"
+    },
+    {
+      "rule_id": "CMP-EVAL-SOP",
+      "contract_status": "executed",
+      "notes": "sop-* fixtures"
+    },
+    {
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "contract_status": "executed",
+      "notes": "acceptance / visible_loss / facts"
+    },
+    {
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "contract_status": "executed",
+      "notes": "conf-* fixtures"
+    },
+    {
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "contract_status": "executed",
+      "notes": "parent_omit / mcp server"
+    },
+    {
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "contract_status": "executed",
+      "notes": "iso-* fixtures"
+    },
+    {
+      "rule_id": "CMP-EVAL-SECURITY",
+      "contract_status": "executed",
+      "notes": "sec-* fixtures"
+    },
+    {
+      "rule_id": "CMP-VAL-CONTRACT-FREEZE",
+      "contract_status": "not_applicable",
+      "notes": "HC-G1 landing gate; not corpus-executed"
+    },
+    {
+      "rule_id": "CMP-VAL-IMPL",
+      "contract_status": "not_applicable",
+      "notes": "HC-G2 impl gate; not corpus-executed"
+    },
+    {
+      "rule_id": "CMP-REPORT-SCHEMA",
+      "contract_status": "executed",
+      "notes": "Ajv draft Report Schema"
+    },
+    {
+      "rule_id": "CMP-REPORT-UNKNOWN-CORE",
+      "contract_status": "executed",
+      "notes": "invalid/unknown-core-field"
+    },
+    {
+      "rule_id": "CMP-PROTO-BINDING",
+      "contract_status": "executed",
+      "notes": "protocol/ 10 + 10b"
+    },
+    {
+      "rule_id": "CMP-LAYER-PROBE-FACTS-ONLY",
+      "contract_status": "catalog_only",
+      "notes": "Probe facts remain distinct from evaluation results."
+    },
+    {
+      "rule_id": "CMP-LAYER-ASSESS-NO-EVAL",
+      "contract_status": "executed",
+      "notes": "validate.mjs rejects Evaluate fields on assessment.json"
+    },
+    {
+      "rule_id": "CMP-LAYER-NO-WEAKEN-REQUIRED-SEC",
+      "contract_status": "catalog_only",
+      "notes": "Required security controls cannot be weakened."
+    },
+    {
+      "rule_id": "CMP-LAYER-SUBAGENT-NOT-PRIMARY",
+      "contract_status": "catalog_only",
+      "notes": "Subagents cannot satisfy a primary-agent requirement."
+    },
+    {
+      "rule_id": "CMP-LAYER-PROJECT-INCLUDE-ONLY",
+      "contract_status": "catalog_only",
+      "notes": "Projection includes only approved content."
+    },
+    {
+      "rule_id": "CMP-COV-CROSSWALK",
+      "contract_status": "catalog_only",
+      "notes": "Obligation crosswalk ledger. Explicit non-Evaluate excludes: §5.10 10/10b; output best_effort blank; sandbox.required false (SRC-SEC-SANDBOX-GATE)."
+    }
+  ],
+  "evaluate_branches": [
+    {
+      "branch_id": "br.act.mapped",
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "fixtures": [
+        "evaluate/act-mapped"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "mapped_activation"
+    },
+    {
+      "branch_id": "br.act.subagent",
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "fixtures": [
+        "evaluate/act-subagent"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "activation_not_primary"
+    },
+    {
+      "branch_id": "br.act.unknown",
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "fixtures": [
+        "evaluate/act-unknown"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "activation_not_primary"
+    },
+    {
+      "branch_id": "br.act.unsupported",
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "fixtures": [
+        "evaluate/act-unsupported"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "activation_not_primary"
+    },
+    {
+      "branch_id": "br.approx.ctx",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/context-mixed"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "visible_loss"
+    },
+    {
+      "branch_id": "br.approx.hook",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/hooks-mixed"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "visible_loss"
+    },
+    {
+      "branch_id": "br.approx.schema",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/schema-approx"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "visible_loss"
+    },
+    {
+      "branch_id": "br.approx.skill",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "visible_loss"
+    },
+    {
+      "branch_id": "br.approx.tool",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/mcp-mixed"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "visible_loss"
+    },
+    {
+      "branch_id": "br.conf.opt-inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "confidence_inferred"
+    },
+    {
+      "branch_id": "br.conf.opt-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.conf.ord-req-inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "confidence_inferred"
+    },
+    {
+      "branch_id": "br.conf.ord-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.conf.sec-req-inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/conf-sec-req-inferred"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.conf.sec-req-unknown",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/conf-sec-req-unknown",
+        "evaluate/sec-missing-facts",
+        "evaluate/sec-empty-policy"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.ctx.min-opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/context-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.ctx.min-req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/context-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.facts.opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/context-mixed"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.facts.req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.hook.min-opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/hooks-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.hook.min-req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/hooks-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.iso.ctx-opt",
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "fixtures": [
+        "evaluate/context-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "isolation_too_broad"
+    },
+    {
+      "branch_id": "br.iso.ctx-req",
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "fixtures": [
+        "evaluate/context-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "isolation_too_broad"
+    },
+    {
+      "branch_id": "br.iso.mcp-req",
+      "rule_id": "CMP-EVAL-ISOLATION",
+      "fixtures": [
+        "evaluate/mcp-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "isolation_too_broad"
+    },
+    {
+      "branch_id": "br.mcp.srv-opt",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "fixtures": [
+        "evaluate/mcp-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "server_not_connected"
+    },
+    {
+      "branch_id": "br.mcp.srv-req",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "fixtures": [
+        "evaluate/mcp-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "server_not_connected"
+    },
+    {
+      "branch_id": "br.schema.min",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/schema-min"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.sec.appr-stricter",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-appr-stricter"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "approval_stricter"
+    },
+    {
+      "branch_id": "br.sec.appr-weaker",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-appr-weaker"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "approval_weaker"
+    },
+    {
+      "branch_id": "br.sec.out-req",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-out-req"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.sec.perm-over",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-perm-over"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "permission_overgrant"
+    },
+    {
+      "branch_id": "br.sec.sbx-enforcement-unk",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-sbx-enforcement-unk",
+        "evaluate/sec-missing-facts",
+        "evaluate/sec-empty-policy"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.sec.sbx-loose",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-sbx-loose"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.sec.sbx-stricter",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-sbx-stricter"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "sandbox_stricter"
+    },
+    {
+      "branch_id": "br.sec.secret-opt",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-secret-opt"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "secret_scope_too_broad"
+    },
+    {
+      "branch_id": "br.sec.secret-req",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "fixtures": [
+        "evaluate/sec-secret-req",
+        "evaluate/sec-secret-req-kept"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "secret_scope_too_broad"
+    },
+    {
+      "branch_id": "br.sk.min-opt",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.sk.min-req",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.sk.parent-omit",
+      "rule_id": "CMP-EVAL-DEPENDENCY",
+      "fixtures": [
+        "evaluate/skills-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "parent_omitted"
+    },
+    {
+      "branch_id": "br.sop.approx",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/sop-approx"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "visible_loss"
+    },
+    {
+      "branch_id": "br.sop.inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "fixtures": [
+        "evaluate/sop-inferred"
+      ],
+      "requirement_result": "degraded",
+      "reason_code": "confidence_inferred"
+    },
+    {
+      "branch_id": "br.sop.min-fail",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/sop-min-fail"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.sop.not-primary",
+      "rule_id": "CMP-EVAL-SOP",
+      "fixtures": [
+        "evaluate/sop-not-primary"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "sop_not_primary"
+    },
+    {
+      "branch_id": "br.sop.unknown-turn",
+      "rule_id": "CMP-EVAL-SOP",
+      "fixtures": [
+        "evaluate/sop-unknown-turn"
+      ],
+      "requirement_result": "unknown",
+      "reason_code": "insufficient_evidence"
+    },
+    {
+      "branch_id": "br.tool.min-opt",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/mcp-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    },
+    {
+      "branch_id": "br.tool.min-req",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "fixtures": [
+        "evaluate/mcp-mixed"
+      ],
+      "requirement_result": "unsatisfied",
+      "reason_code": "acceptance_failed"
+    }
+  ],
+  "explicit_excludes": [
+    {
+      "obligation": "output.enforcement: best_effort Host does not validate",
+      "status": "excluded",
+      "reason": "requirement_result satisfied; not a ≠satisfied Evaluate branch_id"
+    },
+    {
+      "obligation": "sandbox.required: false missing/looser/unsupported",
+      "status": "excluded",
+      "reason": "SRC-SEC-SANDBOX-GATE; not a ≠satisfied branch"
+    },
+    {
+      "obligation": "§5.10 rows 10 / 10b",
+      "status": "excluded",
+      "reason": "protocol/binding; covered by CMP-PROTO-BINDING fixtures, not evaluate_branches"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "security": {
+    "approvals": {
+      "required": true
+    }
+  }
+}

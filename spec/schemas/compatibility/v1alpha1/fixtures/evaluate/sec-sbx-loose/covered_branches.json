@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.sbx-loose",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "acceptance_failed",
+      "item_locator": "/security/sandbox",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

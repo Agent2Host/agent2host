@@ -1,0 +1,84 @@
+{
+  "skills": [
+    {
+      "id": "sk-min-req",
+      "support": "unsupported",
+      "confidence": "documented",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-parent-child",
+      "support": "mapped",
+      "confidence": "documented",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-approx",
+      "support": "approximate",
+      "confidence": "documented",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-facts-req",
+      "support": "unknown",
+      "confidence": "unknown",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-ord-req-inferred",
+      "support": "mapped",
+      "confidence": "inferred",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-opt-inferred",
+      "support": "mapped",
+      "confidence": "inferred",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-ord-req-unknown",
+      "support": "unknown",
+      "confidence": "unknown",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-opt-unknown",
+      "support": "unknown",
+      "confidence": "unknown",
+      "scope": "agent"
+    },
+    {
+      "id": "sk-min-opt",
+      "support": "unsupported",
+      "confidence": "documented",
+      "scope": "agent"
+    }
+  ],
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  }
+}

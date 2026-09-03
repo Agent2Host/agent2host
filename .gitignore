@@ -1,0 +1,62 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# Agent2Host local state (never commit user homes)
+.a2h/
+a2h-home/
+
+# Go
+*.test
+*.out
+vendor/
+bin/
+
+# Dependencies / build (language-agnostic placeholders)
+node_modules/
+dist/
+build/
+out/
+target/
+*.egg-info/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage/
+.turbo/
+.next/
+.cache/
+
+# Logs / temp
+*.log
+tmp/
+temp/
+*.tmp
+
+# OS package leftovers
+*.deb
+*.rpm
+
+# Personal notes (not an implementation driver)
+learning/
+test/
+problems/

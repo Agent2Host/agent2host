@@ -1,0 +1,84 @@
+{
+  "contexts": [
+    {
+      "path": "contexts/min-req.md",
+      "required": true,
+      "loading": "on_demand",
+      "isolation": "required",
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented"
+    },
+    {
+      "path": "contexts/min-opt.md",
+      "required": false,
+      "loading": "on_demand",
+      "isolation": "required",
+      "support": "unsupported",
+      "scope": "agent",
+      "confidence": "documented"
+    },
+    {
+      "path": "contexts/approx.md",
+      "required": true,
+      "loading": "on_demand",
+      "isolation": "required",
+      "support": "approximate",
+      "scope": "agent",
+      "confidence": "documented"
+    },
+    {
+      "path": "contexts/facts-opt.md",
+      "required": false,
+      "loading": "on_demand",
+      "isolation": "required",
+      "support": "unknown",
+      "scope": "agent",
+      "confidence": "unknown"
+    }
+  ],
+  "context_isolation": [
+    {
+      "path": "contexts/iso-req.md",
+      "required": true,
+      "support": "mapped",
+      "scope": "project",
+      "enforcement": "none",
+      "confidence": "documented"
+    },
+    {
+      "path": "contexts/iso-opt.md",
+      "required": false,
+      "support": "mapped",
+      "scope": "project",
+      "enforcement": "none",
+      "confidence": "documented"
+    }
+  ],
+  "security": {
+    "permissions": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "approvals": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "sandbox": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    },
+    "output_validation": {
+      "support": "mapped",
+      "scope": "agent",
+      "enforcement": "host_enforced",
+      "confidence": "documented"
+    }
+  }
+}

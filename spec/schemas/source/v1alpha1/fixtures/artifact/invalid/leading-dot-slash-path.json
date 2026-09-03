@@ -1,0 +1,10 @@
+{
+  "digest_format": "agent2host-system-v1",
+  "files": [
+    {
+      "path": "./system.json",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "type": "file"
+    }
+  ]
+}

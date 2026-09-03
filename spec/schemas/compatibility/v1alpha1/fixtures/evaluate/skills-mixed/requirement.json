@@ -1,0 +1,41 @@
+{
+  "skills": [
+    {
+      "id": "sk-min-req",
+      "required": true
+    },
+    {
+      "id": "sk-parent-child",
+      "required": true,
+      "exclusive_of": "sk-min-req"
+    },
+    {
+      "id": "sk-approx",
+      "required": true
+    },
+    {
+      "id": "sk-facts-req",
+      "required": true
+    },
+    {
+      "id": "sk-ord-req-inferred",
+      "required": true
+    },
+    {
+      "id": "sk-opt-inferred",
+      "required": false
+    },
+    {
+      "id": "sk-ord-req-unknown",
+      "required": true
+    },
+    {
+      "id": "sk-opt-unknown",
+      "required": false
+    },
+    {
+      "id": "sk-min-opt",
+      "required": false
+    }
+  ]
+}

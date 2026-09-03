@@ -1,0 +1,57 @@
+{
+  "schema_version": "agent2host/v1alpha1-path-type-recipe",
+  "rule_id": "SRC-PATH-TYPE",
+  "validation_layer": "filesystem",
+  "contract_status": "catalog_only",
+  "notes": "Git cannot store FIFO/socket/device. setup.mjs builds nodes at runtime. Freeze locks construction + expected rule_id. Go register is SRC-VAL-IMPL.",
+  "order": [
+    "Copy source-template/ to work/ (gitignored)",
+    "For each case, point Agent sop at the constructed node",
+    "register MUST fail SRC-PATH-TYPE"
+  ],
+  "cases": [
+    {
+      "id": "symlink-leaf",
+      "construct": "posix_symlink",
+      "how": "ln -s demo.sop.md sops/link.sop.md (leaf is a symlink)",
+      "sop": "./sops/link.sop.md",
+      "expected": { "register": "fail", "rule_id": "SRC-PATH-TYPE" }
+    },
+    {
+      "id": "symlink-component",
+      "construct": "posix_symlink",
+      "how": "ln -s sops sops-link; Agent sop ./sops-link/demo.sop.md (component symlink)",
+      "sop": "./sops-link/demo.sop.md",
+      "expected": { "register": "fail", "rule_id": "SRC-PATH-TYPE" }
+    },
+    {
+      "id": "directory",
+      "construct": "mkdir",
+      "how": "mkdir sops/not-a-file.sop.md",
+      "sop": "./sops/not-a-file.sop.md",
+      "expected": { "register": "fail", "rule_id": "SRC-PATH-TYPE" }
+    },
+    {
+      "id": "fifo",
+      "construct": "mkfifo",
+      "how": "mkfifo sops/fifo.sop.md (POSIX). Skip on Windows with skip_reason platform.",
+      "sop": "./sops/fifo.sop.md",
+      "expected": { "register": "fail", "rule_id": "SRC-PATH-TYPE" }
+    },
+    {
+      "id": "unix-socket",
+      "construct": "bind_unix_socket",
+      "how": "Bind a Unix domain socket. Darwin sun_path is ~104 bytes: setup.mjs binds under os.tmpdir()/amx-pt/<pid>/sops/s. Skip on Windows. Restricted sandboxes MAY skip with skip_reason listen_failed; expected rule_id is unchanged.",
+      "sop": "./sops/sock.sop.md",
+      "expected": { "register": "fail", "rule_id": "SRC-PATH-TYPE" }
+    },
+    {
+      "id": "device",
+      "construct": "synthetic_metadata",
+      "how": "Do not create a real device node. Implementation tests MAY inject a stat() stub (mode S_IFBLK/S_IFCHR). Freeze expected remains SRC-PATH-TYPE.",
+      "sop": "./sops/demo.sop.md",
+      "expected": { "register": "fail", "rule_id": "SRC-PATH-TYPE" },
+      "skip_create": true
+    }
+  ]
+}

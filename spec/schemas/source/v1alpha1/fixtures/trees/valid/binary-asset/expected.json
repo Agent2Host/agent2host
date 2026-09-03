@@ -1,0 +1,15 @@
+{
+  "register": "success",
+  "rule_id": "SRC-ENC-ASSET",
+  "go_test": "planned",
+  "notes": "Binary Asset hashed as raw bytes.",
+  "assertions": {
+    "artifact_member_paths": [
+      "system.json",
+      "agents/demo.agent.json",
+      "sops/demo.sop.md",
+      "skills/pack.skill.md",
+      "assets/blob.bin"
+    ]
+  }
+}

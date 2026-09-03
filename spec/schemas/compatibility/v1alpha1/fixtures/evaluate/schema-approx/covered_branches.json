@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.approx.schema",
+      "rule_id": "CMP-EVAL-ACCEPTANCE",
+      "reason_code": "visible_loss",
+      "item_locator": "/capabilities/output_schema",
+      "requirement_result": "degraded"
+    }
+  ]
+}

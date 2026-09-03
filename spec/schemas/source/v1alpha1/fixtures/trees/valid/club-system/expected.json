@@ -1,0 +1,30 @@
+{
+  "register": "success",
+  "go_test": "planned",
+  "notes": "SRC-SECRET-PLACEMENT + SRC-SECRET-REPORT identity. Artifact packs unused-declared; resolve is closure-only.",
+  "secret_isolation_items": [
+    { "consumer": "/environment", "target": "OPENAI_API_KEY" },
+    { "consumer": "/mcp_servers/club-database", "target": "CLUB_DB_TOKEN" },
+    { "consumer": "/mcp_servers/club-database", "target": "CLUB_DB_READONLY" },
+    { "consumer": "/hooks/before_tool_call/0", "target": "AUDIT_TOKEN" }
+  ],
+  "assertions": {
+    "artifact_member_paths": [
+      "system.json",
+      "agents/club-admin.agent.json",
+      "agents/club-faq.agent.json",
+      "contexts/club-handbook.md",
+      "hooks/validate-tool-call.py",
+      "mcp/club-database.py",
+      "skills/search-policy.skill.md",
+      "skills/unused-declared.skill.md",
+      "skills/verify-member.skill.md",
+      "sops/club-admin.sop.md",
+      "sops/club-faq.sop.md"
+    ],
+    "resolved_skill_ids": {
+      "club-admin": ["search-policy"],
+      "club-faq": ["search-policy", "verify-member"]
+    }
+  }
+}

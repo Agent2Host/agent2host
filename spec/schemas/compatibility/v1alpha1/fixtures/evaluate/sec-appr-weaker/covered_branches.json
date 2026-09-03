@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sec.appr-weaker",
+      "rule_id": "CMP-EVAL-SECURITY",
+      "reason_code": "approval_weaker",
+      "item_locator": "/security/approvals",
+      "requirement_result": "unsatisfied"
+    }
+  ]
+}

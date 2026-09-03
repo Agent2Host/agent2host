@@ -1,0 +1,7 @@
+{
+  "register": "success",
+  "rule_id": "SRC-CONTENT-SCAN-WARN",
+  "warning": true,
+  "go_test": "planned",
+  "notes": "Heuristic scanners MAY warn and MUST NOT change accept/reject."
+}

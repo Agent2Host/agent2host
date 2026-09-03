@@ -1,0 +1,33 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "club-admin",
+  "name": "Club Admin",
+  "description": "Administrative club operations.",
+  "sop": "./sops/club-admin.sop.md",
+  "skills": [
+    "search-policy"
+  ],
+  "mcp_servers": {
+    "club-database": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/club-database.py"
+      ],
+      "files": [
+        "./mcp/club-database.py"
+      ],
+      "tools": [
+        "search_policy"
+      ]
+    }
+  },
+  "contexts": [
+    {
+      "path": "./contexts/club-handbook.md",
+      "loading": "on_demand"
+    }
+  ]
+}

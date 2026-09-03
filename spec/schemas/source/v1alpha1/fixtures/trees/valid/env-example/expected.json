@@ -1,0 +1,6 @@
+{
+  "register": "success",
+  "rule_id": "SRC-PATH-HARD-DENY",
+  "go_test": "planned",
+  "notes": ".env.example is explicitly allowed; not a secret-filename refuse."
+}

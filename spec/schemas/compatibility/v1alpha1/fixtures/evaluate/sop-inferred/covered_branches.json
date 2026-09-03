@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.sop.inferred",
+      "rule_id": "CMP-EVAL-CONFIDENCE",
+      "reason_code": "confidence_inferred",
+      "item_locator": "/capabilities/sop",
+      "requirement_result": "degraded"
+    }
+  ]
+}

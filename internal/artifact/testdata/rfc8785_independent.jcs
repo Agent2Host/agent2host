@@ -1,0 +1,1 @@
+{"digest_format":"agent2host-system-v1","files":[{"path":"agents/demo.agent.json","sha256":"2b67bf9bbf4bbcaf60ea7df1f970eee71425d927e00edb4a1de3ddc28ecc0991","type":"file"},{"path":"system.json","sha256":"4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93","type":"file"}]}

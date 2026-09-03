@@ -1,0 +1,16 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md",
+  "hooks": {
+    "session_start": [
+      {
+        "command": "C:/Python/python.exe",
+        "args": [
+          "--version"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "covered_branches": [
+    {
+      "branch_id": "br.act.unknown",
+      "rule_id": "CMP-EVAL-ACTIVATION",
+      "reason_code": "activation_not_primary",
+      "item_locator": "/activation",
+      "requirement_result": "unknown"
+    }
+  ]
+}

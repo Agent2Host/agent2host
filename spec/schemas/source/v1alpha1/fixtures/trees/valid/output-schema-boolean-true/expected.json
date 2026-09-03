@@ -1,0 +1,6 @@
+{
+  "register": "success",
+  "rule_id": "SRC-OUT-ROOT",
+  "go_test": "planned",
+  "notes": "Boolean schema true is a legal 2020-12 document root."
+}

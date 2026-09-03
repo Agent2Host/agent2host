@@ -1,0 +1,11 @@
+{
+  "register": "success",
+  "rule_id": "SRC-PATH-DEDUP",
+  "go_test": "planned",
+  "notes": "Two agents share one canonical context path. Artifact stores one member.",
+  "assertions": {
+    "member_occurrences": {
+      "contexts/shared.md": 1
+    }
+  }
+}
