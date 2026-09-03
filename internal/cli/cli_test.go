@@ -603,3 +603,89 @@ func TestCLICleanHostStateRejectsTraversal(t *testing.T) {
 		t.Fatal("must not delete a path outside Host state")
 	}
 }
+
+func writeMiniSystem(t *testing.T, workRoot string) string {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "agents"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "sops"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	sys := `{
+  "schema_version": "agent2host/v1alpha2",
+  "kind": "AgentSystem",
+  "id": "mini-sys",
+  "version": "0.1.0",
+  "agents": ["./agents/demo.agent.json"],
+  "work_root": ` + workRoot + `
+}`
+	if err := os.WriteFile(filepath.Join(dir, "system.json"), []byte(sys), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	agent := `{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "name": "Demo",
+  "sop": "./sops/demo.sop.md"
+}`
+	if err := os.WriteFile(filepath.Join(dir, "agents", "demo.agent.json"), []byte(agent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "sops", "demo.sop.md"), []byte("# demo\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return dir
+}
+
+func TestCLICheckPrintsInvocationWorkRoot(t *testing.T) {
+	src := writeMiniSystem(t, `{"mode":"invocation"}`)
+	home := t.TempDir()
+	var out, errb bytes.Buffer
+	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
+		t.Fatalf("register %s", errb.String())
+	}
+	restore := cli.SetCheckHostsForTest(committed.New(
+		func(file string) (string, error) { return "/opt/" + file, nil },
+		func(string) (string, error) { return "1.0.0-test", nil },
+	))
+	defer restore()
+	project := t.TempDir()
+	out.Reset()
+	errb.Reset()
+	code := cli.Main([]string{"a2h", "--home", home, "check", "mini-sys/demo", "--host", "claude-code", "--project", project}, &out, &errb)
+	if code != 0 {
+		t.Fatalf("check %d: %s", code, errb.String())
+	}
+	if !strings.Contains(errb.String(), "Work root (invocation):") {
+		t.Fatalf("stderr %q", errb.String())
+	}
+	if !strings.Contains(errb.String(), project) && !strings.Contains(errb.String(), filepath.Base(project)) {
+		t.Fatalf("project path missing: %q", errb.String())
+	}
+}
+
+func TestCLICheckFixedRejectsProject(t *testing.T) {
+	src := writeMiniSystem(t, `{"mode":"fixed","path_from_home":"Desktop/A2HWorkRootTest"}`)
+	home := t.TempDir()
+	var out, errb bytes.Buffer
+	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
+		t.Fatalf("register %s", errb.String())
+	}
+	restore := cli.SetCheckHostsForTest(committed.New(
+		func(file string) (string, error) { return "/opt/" + file, nil },
+		func(string) (string, error) { return "1.0.0-test", nil },
+	))
+	defer restore()
+	out.Reset()
+	errb.Reset()
+	code := cli.Main([]string{"a2h", "--home", home, "check", "mini-sys/demo", "--host", "claude-code", "--project", t.TempDir()}, &out, &errb)
+	if code != cli.ExitUsage {
+		t.Fatalf("code=%d stderr=%q", code, errb.String())
+	}
+	if !strings.Contains(errb.String(), "invocation") {
+		t.Fatalf("stderr %q", errb.String())
+	}
+}

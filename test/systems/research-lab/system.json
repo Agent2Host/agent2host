@@ -1,10 +1,11 @@
 {
-  "schema_version": "agent2host/v1alpha1",
+  "schema_version": "agent2host/v1alpha2",
   "kind": "AgentSystem",
   "id": "research-lab",
   "name": "Research lab",
   "description": "Web research, notes, citations, and English practice — mixed SOP styles.",
   "version": "0.1.0",
+  "work_root": { "mode": "invocation" },
   "agents": [
     "./agents/web-researcher.agent.json",
     "./agents/note-synthesizer.agent.json",

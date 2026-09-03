@@ -1,10 +1,11 @@
 {
-  "schema_version": "agent2host/v1alpha1",
+  "schema_version": "agent2host/v1alpha2",
   "kind": "AgentSystem",
   "id": "dev-studio",
   "name": "Development studio",
   "description": "Multi-agent software engineering workbench for integration testing.",
   "version": "0.1.0",
+  "work_root": { "mode": "invocation" },
   "agents": [
     "./agents/code-reviewer.agent.json",
     "./agents/implementer.agent.json",

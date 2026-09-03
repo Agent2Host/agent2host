@@ -5,6 +5,40 @@ import (
 	"testing"
 )
 
+func TestV1Alpha1WorkRootDefaultsToInvocation(t *testing.T) {
+	sys := []byte(`{"schema_version":"agent2host/v1alpha1","kind":"AgentSystem","id":"sys","version":"1.0.0","agents":["agents/a.agent.json"]}`)
+	agent := []byte(`{"schema_version":"agent2host/v1alpha1","kind":"Agent","id":"demo","sop":"sops/a.sop.md"}`)
+	payload := map[string][]byte{
+		"system.json":         sys,
+		"agents/a.agent.json": agent,
+		"sops/a.sop.md":       []byte("# sop\n"),
+	}
+	run, err := closure("sys", "demo", "sha256:test", payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if run.WorkRoot.Mode != "invocation" || run.WorkRoot.PathFromHome != "" {
+		t.Fatalf("%+v", run.WorkRoot)
+	}
+}
+
+func TestV1Alpha2FixedWorkRootSurvivesResolve(t *testing.T) {
+	sys := []byte(`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"sys","version":"1.0.0","agents":["agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/Events"}}`)
+	agent := []byte(`{"schema_version":"agent2host/v1alpha1","kind":"Agent","id":"demo","sop":"sops/a.sop.md"}`)
+	payload := map[string][]byte{
+		"system.json":         sys,
+		"agents/a.agent.json": agent,
+		"sops/a.sop.md":       []byte("# sop\n"),
+	}
+	run, err := closure("sys", "demo", "sha256:test", payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if run.WorkRoot.Mode != "fixed" || run.WorkRoot.PathFromHome != "Desktop/Events" {
+		t.Fatalf("%+v", run.WorkRoot)
+	}
+}
+
 func TestScriptsOrderDeterministic(t *testing.T) {
 	sys := []byte(`{"schema_version":"agent2host/v1alpha1","kind":"AgentSystem","id":"sys","version":"1.0.0","agents":["agents/a.agent.json"]}`)
 	agent := []byte(`{"schema_version":"agent2host/v1alpha1","kind":"Agent","id":"demo","sop":"sops/a.sop.md","mcp_servers":{"z-server":{"transport":"stdio","command":"python","args":["./mcp/z.py"],"files":["./mcp/z.py"],"tools":["tz"]},"a-server":{"transport":"stdio","command":"python","args":["./mcp/a.py"],"files":["./mcp/a.py"],"tools":["ta"]}}}`)

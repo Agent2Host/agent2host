@@ -33,9 +33,23 @@ type SystemSource struct {
 	Version       string                      `json:"version"`
 	Agents        []string                    `json:"agents"`
 	Skills        *map[string]SkillEntry      `json:"skills,omitempty"`
+	WorkRoot      *WorkRoot                   `json:"work_root,omitempty"`
 	Defaults      *SystemDefaults             `json:"defaults,omitempty"`
 	Extensions    *map[string]json.RawMessage `json:"extensions,omitempty"`
 }
+
+// WorkRoot is how a System selects the Host process working directory.
+type WorkRoot struct {
+	Mode         string `json:"mode"`
+	PathFromHome string `json:"path_from_home,omitempty"`
+}
+
+const (
+	WorkRootFixed      = "fixed"
+	WorkRootInvocation = "invocation"
+	SchemaVersionV1    = "agent2host/v1alpha1"
+	SchemaVersionV2    = "agent2host/v1alpha2"
+)
 
 // ArtifactManifest is the Canonical System Artifact object. Separate from Source types.
 type ArtifactManifest struct {

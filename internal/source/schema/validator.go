@@ -23,14 +23,18 @@ const (
 	idCommon   = "urn:agent2host:schema:source:v1alpha1:common"
 	idAgent    = "urn:agent2host:schema:source:v1alpha1:agent"
 	idSystem   = "urn:agent2host:schema:source:v1alpha1:system"
+	idSystemV2 = "urn:agent2host:schema:source:v1alpha2:system"
 	idArtifact = "urn:agent2host:schema:artifact:agent2host-system-v1"
+	srcV1      = "agent2host/v1alpha1"
+	srcV2      = "agent2host/v1alpha2"
 )
 
-// Validator compiles published v1alpha1 schemas from the embedded snapshot.
+// Validator compiles published Source schemas from the embedded snapshot.
 // It never loads draft-v1alpha1/ or the network, and does not search the source tree.
 type Validator struct {
 	agent    *jsonschema.Schema
 	system   *jsonschema.Schema
+	systemV2 *jsonschema.Schema
 	artifact *jsonschema.Schema
 }
 
@@ -54,6 +58,7 @@ func Load() (*Validator, error) {
 		{idCommon, schemafs.Common},
 		{idAgent, schemafs.Agent},
 		{idSystem, schemafs.System},
+		{idSystemV2, schemafs.SystemV2},
 		{idArtifact, schemafs.Artifact},
 	} {
 		doc, err := loadEmbedded(p.name)
@@ -73,11 +78,15 @@ func Load() (*Validator, error) {
 	if err != nil {
 		return nil, fmt.Errorf("schema: compile system: %w", err)
 	}
+	systemV2, err := c.Compile(idSystemV2)
+	if err != nil {
+		return nil, fmt.Errorf("schema: compile system v1alpha2: %w", err)
+	}
 	artifact, err := c.Compile(idArtifact)
 	if err != nil {
 		return nil, fmt.Errorf("schema: compile artifact: %w", err)
 	}
-	return &Validator{agent: agent, system: system, artifact: artifact}, nil
+	return &Validator{agent: agent, system: system, systemV2: systemV2, artifact: artifact}, nil
 }
 
 func loadEmbedded(name string) (any, error) {
@@ -119,7 +128,14 @@ func (v *Validator) Validate(kind Kind, instance any) error {
 	case KindAgent:
 		sch = v.agent
 	case KindSystem:
-		sch = v.system
+		switch instanceSchemaVersion(instance) {
+		case srcV2:
+			sch = v.systemV2
+		case srcV1, "":
+			sch = v.system
+		default:
+			return fmt.Errorf("schema: unsupported system schema_version %q", instanceSchemaVersion(instance))
+		}
 	case KindArtifact:
 		sch = v.artifact
 	default:
@@ -129,4 +145,13 @@ func (v *Validator) Validate(kind Kind, instance any) error {
 		return err
 	}
 	return nil
+}
+
+func instanceSchemaVersion(instance any) string {
+	m, ok := instance.(map[string]any)
+	if !ok {
+		return ""
+	}
+	s, _ := m["schema_version"].(string)
+	return s
 }

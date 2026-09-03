@@ -65,6 +65,7 @@ type ResolvedAgentRun struct {
 	Assets           []string                    `json:"assets"`
 	MCPServers       map[string]ResolvedMCP      `json:"mcp_servers"`
 	Hooks            *decode.Hooks               `json:"hooks,omitempty"`
+	WorkRoot         decode.WorkRoot             `json:"work_root"`
 	Permissions      *decode.Permissions         `json:"permissions,omitempty"`
 	Approvals        *decode.Approvals           `json:"approvals,omitempty"`
 	Sandbox          *decode.Sandbox             `json:"sandbox,omitempty"`
@@ -129,6 +130,7 @@ func closure(systemID, agentID, revision string, payload map[string][]byte) (*Re
 		MCPServers:       map[string]ResolvedMCP{},
 		Content:          map[string][]byte{},
 		Hooks:            hooks,
+		WorkRoot:         normalize.EffectiveWorkRoot(sys),
 		Permissions:      spec.Permissions,
 		Approvals:        spec.Approvals,
 		Sandbox:          spec.Sandbox,

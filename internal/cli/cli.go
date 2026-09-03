@@ -15,6 +15,7 @@ import (
 	"github.com/agent2host/agent2host/internal/adapter/committed"
 	"github.com/agent2host/agent2host/internal/compatibility"
 	"github.com/agent2host/agent2host/internal/runtime"
+	"github.com/agent2host/agent2host/internal/source/decode"
 	srcpath "github.com/agent2host/agent2host/internal/source/path"
 	"github.com/agent2host/agent2host/internal/source/rule"
 	"github.com/agent2host/agent2host/internal/space"
@@ -85,16 +86,16 @@ func Main(args []string, stdout, stderr io.Writer) int {
 		return cmdInspect(home, f.rest[0], f.jsonOut, stdout, stderr)
 	case "check":
 		if len(f.rest) != 1 || f.host == "" {
-			fmt.Fprintln(stderr, "usage: a2h check <system-id>/<agent-id> --host <host>")
+			fmt.Fprintln(stderr, "usage: a2h check <system-id>/<agent-id> --host <host> [--project dir]")
 			return ExitUsage
 		}
-		return cmdCheck(home, f.rest[0], f.host, f.requireStrictRead, f.jsonOut, stdout, stderr)
+		return cmdCheck(home, f.rest[0], f.host, f.project, f.requireStrictRead, f.jsonOut, stdout, stderr)
 	case "run":
 		if len(f.rest) < 1 || f.host == "" {
-			fmt.Fprintln(stderr, "usage: a2h run <system-id>/<agent-id> --host <host> [--verbose] [--accept-warnings] [-- <native args>]")
+			fmt.Fprintln(stderr, "usage: a2h run <system-id>/<agent-id> --host <host> [--project dir] [--verbose] [--accept-warnings] [-- <native args>]")
 			return ExitUsage
 		}
-		return cmdRun(home, f.rest[0], f.rest[1:], f.host, f.requireStrictRead, f.jsonOut, f.verbose, f.acceptWarnings, stdout, stderr)
+		return cmdRun(home, f.rest[0], f.rest[1:], f.host, f.project, f.requireStrictRead, f.jsonOut, f.verbose, f.acceptWarnings, stdout, stderr)
 	case "remove":
 		if len(f.rest) != 1 {
 			fmt.Fprintln(stderr, "usage: a2h remove <system-id>")
@@ -148,7 +149,7 @@ func resolveHome(flagHome string) (string, error) {
 }
 
 type parsed struct {
-	home, host, cmd                             string
+	home, host, cmd, project                    string
 	rest                                        []string
 	jsonOut, verbose, acceptWarnings            bool
 	requireStrictRead                           bool
@@ -178,6 +179,14 @@ func parseArgs(args []string) (parsed, error) {
 			f.host = args[i]
 		case strings.HasPrefix(a, "--host="):
 			f.host = strings.TrimPrefix(a, "--host=")
+		case a == "--project":
+			if i+1 >= len(args) {
+				return parsed{}, fmt.Errorf("missing --project value")
+			}
+			i++
+			f.project = args[i]
+		case strings.HasPrefix(a, "--project="):
+			f.project = strings.TrimPrefix(a, "--project=")
 		case a == "--version":
 			f.printVersion = true
 		case a == "--json":
@@ -243,6 +252,7 @@ func validateCommandFlags(f parsed) error {
 		return unusedFlags(cmd, map[string]bool{
 			"--accept-warnings":     f.acceptWarnings,
 			"--require-strict-read": f.requireStrictRead,
+			"--project":             f.project != "",
 		})
 	case "register", "list", "inspect", "remove", "resolve", "version", "":
 		if f.host != "" {
@@ -251,6 +261,7 @@ func validateCommandFlags(f parsed) error {
 		return unusedFlags(cmd, map[string]bool{
 			"--accept-warnings":     f.acceptWarnings,
 			"--require-strict-read": f.requireStrictRead,
+			"--project":             f.project != "",
 			"--runtime":             f.runtimeScope,
 			"--quarantine":          f.quarantine,
 			"--host-state":          f.hostState,
@@ -284,6 +295,40 @@ func unusedFlagMessage(cmd, flag string) error {
 
 func open(home string) (*space.Space, error) {
 	return space.Open(home)
+}
+
+func resolveAndPrintWorkRoot(run *space.ResolvedAgentRun, project string, createFixed bool, stderr io.Writer) (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	res, err := runtime.ResolveRunWorkRoot(run, project, cwd, userHome)
+	if err != nil {
+		return "", err
+	}
+	if createFixed && res.Mode == decode.WorkRootFixed && !res.Exists {
+		fmt.Fprintf(stderr, "This Agent System will use or create:\n%s\n", res.Path)
+		res, err = runtime.EnsureWorkRoot(res)
+		if err != nil {
+			return "", err
+		}
+	} else if res.Mode == decode.WorkRootFixed && !res.Exists {
+		fmt.Fprintf(stderr, "This Agent System will use or create:\n%s\n", res.Path)
+	} else {
+		fmt.Fprintf(stderr, "Work root (%s): %s\n", res.Mode, res.Path)
+	}
+	return res.Path, nil
+}
+
+func exitWorkRoot(err error) int {
+	if errors.Is(err, runtime.ErrWorkRootProject) || errors.Is(err, runtime.ErrWorkRootBadRel) {
+		return ExitUsage
+	}
+	return ExitPrecondition
 }
 
 func cmdRegister(home, dir string, jsonOut bool, stdout, stderr io.Writer) int {
@@ -371,6 +416,11 @@ func cmdInspect(home, target string, jsonOut bool, stdout, stderr io.Writer) int
 	fmt.Fprintf(stdout, "version:  %s\n", ins.Version)
 	fmt.Fprintf(stdout, "revision: %s\n", ins.ArtifactRevision)
 	fmt.Fprintf(stdout, "source:   %s\n", ins.Source)
+	fmt.Fprintf(stdout, "work root: %s", ins.WorkRoot.Mode)
+	if ins.WorkRoot.PathFromHome != "" {
+		fmt.Fprintf(stdout, " (%s)", ins.WorkRoot.PathFromHome)
+	}
+	fmt.Fprintln(stdout)
 	if len(ins.Skills) > 0 {
 		fmt.Fprintf(stdout, "skills:   %s\n", strings.Join(ins.Skills, ", "))
 	}
@@ -398,7 +448,7 @@ func cmdResolve(home, target string, stdout, stderr io.Writer) int {
 
 const executionContract = "agent2host/execution-contract/v1alpha1"
 
-func cmdCheck(home, target, host string, requireStrictRead, jsonOut bool, stdout, stderr io.Writer) int {
+func cmdCheck(home, target, host, project string, requireStrictRead, jsonOut bool, stdout, stderr io.Writer) int {
 	sys, agent, err := space.ParseTarget(target)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -415,6 +465,10 @@ func cmdCheck(home, target, host string, requireStrictRead, jsonOut bool, stdout
 		return exitSpaceOrRegistry(err)
 	}
 	policy := adapter.RunPolicy{RequireStrictRead: requireStrictRead}
+	if _, err := resolveAndPrintWorkRoot(run, project, false, stderr); err != nil {
+		fmt.Fprintln(stderr, err)
+		return exitWorkRoot(err)
+	}
 	pctx, _, err := runtime.PrepareContext(home, "", runtime.ContextCheck)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -448,7 +502,7 @@ func cmdCheck(home, target, host string, requireStrictRead, jsonOut bool, stdout
 	return ExitOK
 }
 
-func cmdRun(home, target string, nativeArgs []string, host string, requireStrictRead, jsonOut, verbose, acceptWarnings bool, stdout, stderr io.Writer) int {
+func cmdRun(home, target string, nativeArgs []string, host, project string, requireStrictRead, jsonOut, verbose, acceptWarnings bool, stdout, stderr io.Writer) int {
 	if err := runtime.RejectNativeArgs(nativeArgs); err != nil {
 		fmt.Fprintln(stderr, err)
 		return ExitUsage
@@ -476,7 +530,12 @@ func cmdRun(home, target string, nativeArgs []string, host string, requireStrict
 	for _, id := range recovered.Quarantined {
 		fmt.Fprintf(stderr, "A previous run could not be cleaned safely and was set aside (%s). Use a2h clean --quarantine to delete it.\n", id)
 	}
-	pctx, reserved, err := runtime.PrepareContext(home, "", runtime.ContextRun)
+	wd, err := resolveAndPrintWorkRoot(run, project, true, stderr)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return exitWorkRoot(err)
+	}
+	pctx, reserved, err := runtime.PrepareContext(home, wd, runtime.ContextRun)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return ExitPrecondition

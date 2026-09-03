@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent2host:schema:source:v1alpha2:system",
+  "title": "Agent2Host AgentSystem (v1alpha2)",
+  "description": "Published agent2host/v1alpha2 AgentSystem. Adds required work_root. Common $ref targets remain v1alpha1 URNs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "id", "version", "agents", "work_root"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "agent2host/v1alpha2" },
+    "kind": { "type": "string", "const": "AgentSystem" },
+    "id": { "$ref": "urn:agent2host:schema:source:v1alpha1:common#/$defs/local_id" },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "version": { "$ref": "urn:agent2host:schema:source:v1alpha1:common#/$defs/semver" },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "urn:agent2host:schema:source:v1alpha1:common#/$defs/portable_path" }
+    },
+    "work_root": { "$ref": "#/$defs/work_root" },
+    "skills": {
+      "type": "object",
+      "propertyNames": { "$ref": "urn:agent2host:schema:source:v1alpha1:common#/$defs/local_id" },
+      "additionalProperties": { "$ref": "urn:agent2host:schema:source:v1alpha1:common#/$defs/skill_entry" }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "context_access": {
+          "type": "string",
+          "enum": ["explicit"]
+        },
+        "cross_system_access": {
+          "type": "string",
+          "enum": ["deny"]
+        }
+      }
+    },
+    "extensions": { "$ref": "urn:agent2host:schema:source:v1alpha1:common#/$defs/extensions" }
+  },
+  "$defs": {
+    "work_root": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "path_from_home"],
+          "properties": {
+            "mode": { "const": "fixed" },
+            "path_from_home": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+              "description": "Home-relative archive root. No leading slash, tilde, or .. segments."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": { "const": "invocation" }
+          }
+        }
+      ]
+    }
+  }
+}

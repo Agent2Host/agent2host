@@ -38,6 +38,34 @@ func TestFrozenSchemaVerdicts(t *testing.T) {
 	mustPass(t, v, schema.KindSystem, join(root, "semantic-reject"), ".system.json")
 }
 
+func TestV1Alpha2WorkRoot(t *testing.T) {
+	v, err := schema.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pass := []string{
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"invocation"}}`,
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/Crossroads/Events"}}`,
+	}
+	for _, raw := range pass {
+		if err := v.ValidateBytes(schema.KindSystem, []byte(raw)); err != nil {
+			t.Fatalf("accept: %v\n%s", err, raw)
+		}
+	}
+	fail := []string{
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"]}`,
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed"}}`,
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"invocation","path_from_home":"Desktop/X"}}`,
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"../etc"}}`,
+		`{"schema_version":"agent2host/v1alpha1","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"invocation"}}`,
+	}
+	for _, raw := range fail {
+		if err := v.ValidateBytes(schema.KindSystem, []byte(raw)); err == nil {
+			t.Fatalf("must reject %s", raw)
+		}
+	}
+}
+
 func TestValidateBytesRejectsDuplicateKeys(t *testing.T) {
 	v, err := schema.Load()
 	if err != nil {

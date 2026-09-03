@@ -61,6 +61,7 @@ func Agent(a *decode.AgentSource) {
 }
 
 // System applies SRC-DEFAULT-SYSTEM. Omitted extensions stay omitted (SRC-DEFAULT-EXT).
+// v1alpha1 systems have no work_root; EffectiveWorkRoot treats that as invocation.
 func System(s *decode.SystemSource) {
 	if s.Defaults == nil {
 		s.Defaults = &decode.SystemDefaults{}
@@ -71,6 +72,14 @@ func System(s *decode.SystemSource) {
 	if s.Defaults.CrossSystemAccess == nil {
 		s.Defaults.CrossSystemAccess = strPtr("deny")
 	}
+}
+
+// EffectiveWorkRoot is the declared work-root mode. v1alpha1 (nil) is invocation.
+func EffectiveWorkRoot(s *decode.SystemSource) decode.WorkRoot {
+	if s != nil && s.WorkRoot != nil && s.WorkRoot.Mode != "" {
+		return *s.WorkRoot
+	}
+	return decode.WorkRoot{Mode: decode.WorkRootInvocation}
 }
 
 func fillMCP(srv *decode.MCPServer) {

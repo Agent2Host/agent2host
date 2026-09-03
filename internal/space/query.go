@@ -3,6 +3,8 @@ package space
 import (
 	"sort"
 	"strings"
+
+	"github.com/agent2host/agent2host/internal/source/decode"
 )
 
 // ParseTarget splits <system-id>/<agent-id>.
@@ -26,13 +28,14 @@ type ListedSystem struct {
 
 // Inspection is Space-side facts for inspect without --host (--json).
 type Inspection struct {
-	SystemID         string   `json:"system_id"`
-	AgentID          string   `json:"agent_id"`
-	Version          string   `json:"version"`
-	ArtifactRevision string   `json:"artifact_revision"`
-	Source           string   `json:"source"`
-	Agents           []string `json:"agents"`
-	Skills           []string `json:"skills"`
+	SystemID         string          `json:"system_id"`
+	AgentID          string          `json:"agent_id"`
+	Version          string          `json:"version"`
+	ArtifactRevision string          `json:"artifact_revision"`
+	Source           string          `json:"source"`
+	Agents           []string        `json:"agents"`
+	Skills           []string        `json:"skills"`
+	WorkRoot         decode.WorkRoot `json:"work_root"`
 }
 
 // List returns registered systems sorted by id.
@@ -87,5 +90,6 @@ func (s *Space) Inspect(systemID, agentID string) (*Inspection, error) {
 		Source:           rec.Source,
 		Agents:           append([]string(nil), rec.Agents...),
 		Skills:           skills,
+		WorkRoot:         run.WorkRoot,
 	}, nil
 }

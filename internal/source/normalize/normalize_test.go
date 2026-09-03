@@ -36,6 +36,20 @@ func TestSecurityBaseline(t *testing.T) {
 	}
 }
 
+func TestEffectiveWorkRootV1IsInvocation(t *testing.T) {
+	got := normalize.EffectiveWorkRoot(&decode.SystemSource{SchemaVersion: decode.SchemaVersionV1})
+	if got.Mode != decode.WorkRootInvocation || got.PathFromHome != "" {
+		t.Fatalf("%+v", got)
+	}
+	got = normalize.EffectiveWorkRoot(&decode.SystemSource{
+		SchemaVersion: decode.SchemaVersionV2,
+		WorkRoot:      &decode.WorkRoot{Mode: decode.WorkRootFixed, PathFromHome: "Desktop/X"},
+	})
+	if got.Mode != decode.WorkRootFixed || got.PathFromHome != "Desktop/X" {
+		t.Fatalf("%+v", got)
+	}
+}
+
 func TestSystemDefaultsBaseline(t *testing.T) {
 	root, err := fixtures.Root()
 	if err != nil {

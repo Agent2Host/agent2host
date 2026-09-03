@@ -30,6 +30,13 @@ a2h run dev-studio/code-reviewer --host claude-code
 
 `check` tells you whether this host can run this agent **before** anything starts.
 
+The folder the host opens is the **work root**, declared by the Agent System (not the folder you registered from):
+
+- **`invocation`** — the directory you pass with `--project`, or the directory you are in. Use this for reviewers that work on whatever repo you point at.
+- **`fixed`** — a folder under your home directory, set in `system.json`. Use this for agents that keep long-lived drafts and reports. `run` cannot change that folder.
+
+A `v1alpha1` system with no `work_root` is treated as `invocation`.
+
 - **Allowed** — start.
 - **Allowed with warnings** — you can start, but some restrictions are unverified. Agent2Host does not guarantee they are in force. A terminal asks `y/N`; scripts pass `--accept-warnings`.
 - **Refused** — this host is missing a required sandbox, or it would silently do something the agent did not allow.
@@ -53,12 +60,22 @@ demo-system/
 
 ```json
 {
-  "schema_version": "agent2host/v1alpha1",
+  "schema_version": "agent2host/v1alpha2",
   "kind": "AgentSystem",
   "id": "demo-system",
   "name": "Demo System",
   "version": "0.1.0",
-  "agents": ["./agents/demo.agent.json"]
+  "agents": ["./agents/demo.agent.json"],
+  "work_root": { "mode": "invocation" }
+}
+```
+
+For an archive that always lives under your home directory:
+
+```json
+"work_root": {
+  "mode": "fixed",
+  "path_from_home": "Desktop/Crossroads/Events"
 }
 ```
 
@@ -80,7 +97,7 @@ Then:
 ```bash
 a2h register ./demo-system
 a2h check demo-system/demo --host claude-code
-a2h run demo-system/demo --host claude-code
+a2h run demo-system/demo --host claude-code --project /path/to/repo
 ```
 
 ## Commands
@@ -89,8 +106,8 @@ a2h run demo-system/demo --host claude-code
 a2h register ./path/to/demo-system
 a2h list
 a2h inspect demo-system/demo
-a2h check demo-system/demo --host claude-code
-a2h run demo-system/demo --host claude-code
+a2h check demo-system/demo --host claude-code [--project dir]
+a2h run demo-system/demo --host claude-code [--project dir]
 a2h remove demo-system
 a2h clean
 a2h version
