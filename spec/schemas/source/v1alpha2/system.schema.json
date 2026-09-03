@@ -52,8 +52,8 @@
             "path_from_home": {
               "type": "string",
               "minLength": 1,
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
-              "description": "Home-relative archive root. No leading slash, tilde, or .. segments."
+              "pattern": "^[^/:]*[^./:][^/:]*(?:/[^/:]*[^./:][^/:]*)*$",
+              "description": "Home-relative archive root. Each segment may use any character macOS allows in a directory name (anything except '/' and ':'). Segments composed entirely of dots ('.' or '..') are rejected. The runtime additionally rejects paths starting with '~' or '/'."
             }
           }
         },

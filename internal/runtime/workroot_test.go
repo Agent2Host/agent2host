@@ -81,6 +81,30 @@ func TestResolveWorkRootFixedCreatesUnderHome(t *testing.T) {
 	}
 }
 
+func TestResolveWorkRootFixedAllowsMacDirectoryNames(t *testing.T) {
+	home := t.TempDir()
+	realHome, err := filepath.EvalSymlinks(home)
+	if err != nil {
+		realHome = home
+	}
+	got, err := ResolveWorkRoot(decode.WorkRoot{Mode: decode.WorkRootFixed, PathFromHome: "Desktop/Tech@Crossroads/Events"}, "", t.TempDir(), home)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(realHome, "Desktop", "Tech@Crossroads", "Events")
+	if got.Path != want {
+		t.Fatalf("path %q want %q", got.Path, want)
+	}
+}
+
+func TestResolveWorkRootFixedRejectsColon(t *testing.T) {
+	home := t.TempDir()
+	_, err := ResolveWorkRoot(decode.WorkRoot{Mode: decode.WorkRootFixed, PathFromHome: "Desktop/foo:bar"}, "", t.TempDir(), home)
+	if !errors.Is(err, ErrWorkRootBadRel) {
+		t.Fatalf("got %v", err)
+	}
+}
+
 func TestResolveWorkRootFixedRejectsDotDot(t *testing.T) {
 	home := t.TempDir()
 	_, err := ResolveWorkRoot(decode.WorkRoot{Mode: decode.WorkRootFixed, PathFromHome: "Desktop/../secret"}, "", t.TempDir(), home)

@@ -75,7 +75,7 @@ For an archive that always lives under your home directory:
 ```json
 "work_root": {
   "mode": "fixed",
-  "path_from_home": "Desktop/Crossroads/Events"
+  "path_from_home": "Desktop/Tech@Crossroads/Events"
 }
 ```
 

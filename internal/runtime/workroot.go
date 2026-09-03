@@ -169,8 +169,10 @@ func resolveInvocation(projectFlag, cwd string) (WorkRootResolution, error) {
 }
 
 func checkPathFromHome(rel string) error {
+	// Align with macOS directory names: '/' separates, ':' is reserved.
+	// Backslash is a legal character in a macOS name, not a separator here.
 	if rel == "" || strings.HasPrefix(rel, "/") || strings.HasPrefix(rel, "\\") ||
-		strings.Contains(rel, "\\") || strings.HasPrefix(rel, "~") {
+		strings.HasPrefix(rel, "~") || strings.ContainsRune(rel, 0) || strings.Contains(rel, ":") {
 		return ErrWorkRootBadRel
 	}
 	for _, seg := range strings.Split(rel, "/") {

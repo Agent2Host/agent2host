@@ -46,6 +46,12 @@ func TestV1Alpha2WorkRoot(t *testing.T) {
 	pass := []string{
 		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"invocation"}}`,
 		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/Crossroads/Events"}}`,
+		// macOS allows @ in directory names
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/Tech@Crossroads/Events"}}`,
+		// macOS allows spaces in directory names
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/My Events/Mid-Autumn"}}`,
+		// macOS allows & ( ) # ! + in directory names
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/Arts & Culture/Events (2026)"}}`,
 	}
 	for _, raw := range pass {
 		if err := v.ValidateBytes(schema.KindSystem, []byte(raw)); err != nil {
@@ -57,6 +63,8 @@ func TestV1Alpha2WorkRoot(t *testing.T) {
 		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed"}}`,
 		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"invocation","path_from_home":"Desktop/X"}}`,
 		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"../etc"}}`,
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"Desktop/foo:bar"}}`,
+		`{"schema_version":"agent2host/v1alpha2","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"fixed","path_from_home":"."}}`,
 		`{"schema_version":"agent2host/v1alpha1","kind":"AgentSystem","id":"demo","version":"0.1.0","agents":["./agents/a.agent.json"],"work_root":{"mode":"invocation"}}`,
 	}
 	for _, raw := range fail {
