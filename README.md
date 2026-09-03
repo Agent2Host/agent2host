@@ -11,7 +11,7 @@ This is a public alpha, not a stable 1.0.
 You need Go 1.22 or newer, and at least one host already installed and signed in: `claude`, `kiro-cli`, or `codex`.
 
 ```bash
-git clone https://github.com/Agent2Host/agent2host.git
+git clone https://github.com/agent2host/agent2host.git
 cd agent2host
 go build -o a2h ./cmd/a2h
 ```
