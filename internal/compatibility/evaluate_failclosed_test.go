@@ -6,7 +6,7 @@ func testEnv() Envelope {
 	return Envelope{
 		SchemaVersion:     schemaVersion,
 		Agent2HostVersion: "0.0.0-test",
-		Subject:           Subject{SystemID: "club-system", AgentID: "club-faq", Revision: "sha256:" + zeros(64)},
+		Subject:           Subject{SystemID: "example-system", AgentID: "example-agent", Revision: "sha256:" + zeros(64)},
 		Host:              HostRef{ID: "codex", Version: "1"},
 		Adapter:           AdapterRef{ID: "codex", Version: "0.1.0"},
 		Probe:             Probe{Fingerprint: "sha256:" + zeros(64)},
@@ -104,17 +104,46 @@ func TestEvaluateUnknownEnforcementRefusesRequiredPermissions(t *testing.T) {
 
 func boolPtr(v bool) *bool { return &v }
 
+func TestEvaluateUnverifiedCeilingWarns(t *testing.T) {
+	req := Requirement{
+		Security: &SecurityReq{
+			Permissions: &FlagReq{Required: true},
+			Approvals:   &FlagReq{Required: true},
+		},
+	}
+	got := Evaluate(testEnv(), req, Assessment{
+		Security: &SecurityAssess{
+			Permissions: &PolicyAssess{
+				Support: "approximate", Scope: "agent", Enforcement: "host_enforced", Confidence: "documented",
+				GrantSubseteqDeclared: boolPtr(true),
+				CeilingVsDeclared:     "unverified",
+			},
+			Approvals: &PolicyAssess{
+				Support: "mapped", Scope: "agent", Enforcement: "host_enforced", Confidence: "documented",
+				GateVsDeclared: "equal",
+			},
+		},
+	})
+	if got.Decision != decisionWarnings {
+		t.Fatalf("unverified restriction must warn, not refuse, got %s", got.Decision)
+	}
+	if got.Security.Permissions.RequirementResult != resultDegraded ||
+		got.Security.Permissions.ReasonCode != "insufficient_evidence" {
+		t.Fatalf("permissions %+v", got.Security.Permissions)
+	}
+}
+
 func TestEvaluateSecretRequiredNotOverriddenByAssess(t *testing.T) {
 	req := Requirement{
 		Secrets: []SecretReq{{
-			Consumer: "/mcp_servers/club-database",
-			Target:   "CLUB_DB_TOKEN",
+			Consumer: "/mcp_servers/example-mcp",
+			Target:   "A2H_TEST_TOKEN",
 			Required: true,
 		}},
 	}
 	got := Evaluate(testEnv(), req, Assessment{
 		SecretIsolation: []SecretAssess{{
-			Consumer: "/mcp_servers/club-database", Target: "CLUB_DB_TOKEN",
+			Consumer: "/mcp_servers/example-mcp", Target: "A2H_TEST_TOKEN",
 			Required: false, Support: "mapped", Scope: "host",
 			Enforcement: "host_enforced", Confidence: "documented",
 		}},

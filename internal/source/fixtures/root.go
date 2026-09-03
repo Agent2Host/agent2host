@@ -22,6 +22,34 @@ func Root() (string, error) {
 	return root, nil
 }
 
+// SystemsRoot returns the official acceptance Agent Systems
+// (dev-studio, ops-desk, research-lab).
+func SystemsRoot() (string, error) {
+	mod, err := moduleRoot()
+	if err != nil {
+		return "", err
+	}
+	root := filepath.Join(mod, "test", "systems")
+	st, err := os.Stat(root)
+	if err != nil || !st.IsDir() {
+		return "", fmt.Errorf("fixtures: official systems missing at %s", root)
+	}
+	return root, nil
+}
+
+// OfficialSystem is the path of one committed acceptance system.
+func OfficialSystem(name string) (string, error) {
+	root, err := SystemsRoot()
+	if err != nil {
+		return "", err
+	}
+	p := filepath.Join(root, name)
+	if _, err := os.Stat(filepath.Join(p, "system.json")); err != nil {
+		return "", fmt.Errorf("fixtures: official system %s: %w", name, err)
+	}
+	return p, nil
+}
+
 func moduleRoot() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {

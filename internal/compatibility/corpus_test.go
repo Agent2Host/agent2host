@@ -48,7 +48,7 @@ func TestBestEffortOutputValidationSatisfied(t *testing.T) {
 	env := Envelope{
 		SchemaVersion:     schemaVersion,
 		Agent2HostVersion: "0.0.0-test",
-		Subject:           Subject{SystemID: "club-system", AgentID: "club-faq", Revision: "sha256:" + zeros(64)},
+		Subject:           Subject{SystemID: "example-system", AgentID: "example-agent", Revision: "sha256:" + zeros(64)},
 		Host:              HostRef{ID: "codex", Version: "1"},
 		Adapter:           AdapterRef{ID: "codex", Version: "0.1.0"},
 		Probe:             Probe{Fingerprint: "sha256:" + zeros(64)},

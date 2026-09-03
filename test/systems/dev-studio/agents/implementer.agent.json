@@ -1,0 +1,72 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "implementer",
+  "name": "Implementer",
+  "description": "ReAct-style implementation agent with write access.",
+  "sop": "./sops/implementer.sop.md",
+  "skills": [
+    "debugging",
+    "refactor-guide"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/eng-handbook.md",
+      "loading": "on_demand"
+    },
+    {
+      "path": "./contexts/arch-overview.md",
+      "loading": "on_demand"
+    }
+  ],
+  "mcp_servers": {
+    "repo-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/repo-tools.py"
+      ],
+      "files": [
+        "./mcp/repo-tools.py"
+      ],
+      "tools": [
+        "get_diff_summary",
+        "read_file_hunk"
+      ]
+    }
+  },
+  "hooks": {
+    "before_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/before-tool.py"
+        ],
+        "files": [
+          "./hooks/before-tool.py"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  },
+  "sandbox": {
+    "required": false,
+    "mode": "workspace_write"
+  }
+}

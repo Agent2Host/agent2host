@@ -7,11 +7,11 @@
     "search-policy"
   ],
   "mcp_servers": {
-    "club-database": {
+    "example-mcp": {
       "transport": "stdio",
       "command": "python",
       "files": [
-        "./mcp/club-database.py"
+        "./mcp/example-mcp.py"
       ],
       "tools": [
         "other_tool"

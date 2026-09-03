@@ -1,0 +1,4 @@
+Agent2Host dev studio glossary (fixture asset).
+- SOP: session behavior document
+- Skill: on-demand task package
+- MCP: tool server over stdio

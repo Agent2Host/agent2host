@@ -106,6 +106,7 @@ type PolicyAssess struct {
 	Enforcement           string `json:"enforcement"`
 	Confidence            string `json:"confidence"`
 	GrantSubseteqDeclared *bool  `json:"grant_subseteq_declared,omitempty"`
+	CeilingVsDeclared     string `json:"ceiling_vs_declared,omitempty"`
 	GateVsDeclared        string `json:"gate_vs_declared,omitempty"`
 	ModeVsDeclared        string `json:"mode_vs_declared,omitempty"`
 }

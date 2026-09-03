@@ -1,0 +1,33 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "config-auditor",
+  "name": "Config auditor",
+  "description": "Read-only project configuration audit.",
+  "sop": "./sops/config-auditor.sop.md",
+  "skills": [
+    "config-audit"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/config-standards.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    }
+  ],
+  "mcp_servers": {},
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

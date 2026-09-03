@@ -98,15 +98,17 @@ func codexProFile() adapter.Profile {
 }
 
 func codexSecurityPolicy(run *space.ResolvedAgentRun, probe adapter.ProbeResult, intent adapter.ControlIntent, p adapter.Profile) (compatibility.PolicyAssess, compatibility.PolicyAssess) {
-	grant := PermissionsGrantSubseteq(run)
+	ceiling := PermissionsCeiling(run)
+	grant, vs := adapter.PermissionPolicyFields(ceiling)
 	permEnforce := adapter.PermissionsEnforcement(grant, intent)
-	gate := ApprovalGateVsDeclared(adapter.ShellExecuteDeclared(run), grant)
+	gate := ApprovalGateVsDeclared(adapter.ShellExecuteDeclared(run))
 	apprEnforce := adapter.ApprovalsEnforcement(gate, intent, p)
 
 	permSupport := "approximate"
 	if !probe.Found {
 		permSupport = "unsupported"
 		grant = false
+		vs = string(adapter.CeilingOvergrant)
 		gate = ""
 	}
 
@@ -116,6 +118,7 @@ func codexSecurityPolicy(run *space.ResolvedAgentRun, probe adapter.ProbeResult,
 		Enforcement:           permEnforce,
 		Confidence:            "documented",
 		GrantSubseteqDeclared: &grant,
+		CeilingVsDeclared:     vs,
 	}
 	appr := compatibility.PolicyAssess{
 		Support:        "mapped",

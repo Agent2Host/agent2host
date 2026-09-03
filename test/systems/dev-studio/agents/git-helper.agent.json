@@ -1,0 +1,57 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "git-helper",
+  "name": "Git helper",
+  "description": "Branches, staging, and commit messages.",
+  "sop": "./sops/git-helper.sop.md",
+  "skills": [
+    "commit-message",
+    "branch-hygiene"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/git-conventions.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    }
+  ],
+  "mcp_servers": {
+    "git-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/git-tools.py"
+      ],
+      "files": [
+        "./mcp/git-tools.py"
+      ],
+      "tools": [
+        "branch_status",
+        "suggest_commit_message",
+        "list_staged_files",
+        {
+          "name": "tag_release_candidate",
+          "required": false
+        }
+      ]
+    }
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

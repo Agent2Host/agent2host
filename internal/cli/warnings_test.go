@@ -13,7 +13,6 @@ import (
 	"github.com/agent2host/agent2host/internal/source/decode"
 	"github.com/agent2host/agent2host/internal/source/fixtures"
 	"github.com/agent2host/agent2host/internal/space"
-	"path/filepath"
 )
 
 func TestConfirmWarningsTable(t *testing.T) {
@@ -191,11 +190,10 @@ func TestCLICheckRejectsAcceptWarnings(t *testing.T) {
 
 func authorizeFixture(t *testing.T) (*adapter.Registry, *space.ResolvedAgentRun) {
 	t.Helper()
-	root, err := fixtures.Root()
+	src, err := fixtures.OfficialSystem("research-lab")
 	if err != nil {
 		t.Fatal(err)
 	}
-	src := filepath.Join(root, "trees", "valid", "markdown-leading-dashes")
 	home := t.TempDir()
 	sp, err := space.Open(home)
 	if err != nil {
@@ -204,7 +202,7 @@ func authorizeFixture(t *testing.T) (*adapter.Registry, *space.ResolvedAgentRun)
 	if _, err := sp.Register(src); err != nil {
 		t.Fatal(err)
 	}
-	run, err := sp.Resolve("fm", "demo", "")
+	run, err := sp.Resolve("research-lab", "web-researcher", "")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -4,6 +4,6 @@
   "id": "Club_System",
   "version": "1.0.0",
   "agents": [
-    "./agents/club-faq.agent.json"
+    "./agents/example-agent.agent.json"
   ]
 }

@@ -1,0 +1,112 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "incident-responder",
+  "name": "Incident responder",
+  "description": "Incident triage with audit log and strict approvals.",
+  "sop": "./sops/incident-responder.sop.md",
+  "skills": [
+    "incident-triage"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/incident-playbook.md",
+      "loading": "on_demand"
+    }
+  ],
+  "mcp_servers": {
+    "audit-log": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/audit-log.py"
+      ],
+      "files": [
+        "./mcp/audit-log.py"
+      ],
+      "tools": [
+        "append_event",
+        "query_events",
+        "export_incident_bundle"
+      ]
+    },
+    "deploy-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/deploy-tools.py"
+      ],
+      "files": [
+        "./mcp/deploy-tools.py"
+      ],
+      "tools": [
+        "health_check"
+      ]
+    }
+  },
+  "hooks": {
+    "session_start": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/session-start.py"
+        ],
+        "files": [
+          "./hooks/session-start.py"
+        ]
+      }
+    ],
+    "before_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/before-tool.py"
+        ],
+        "files": [
+          "./hooks/before-tool.py"
+        ]
+      }
+    ],
+    "after_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/after-tool.py"
+        ],
+        "files": [
+          "./hooks/after-tool.py"
+        ],
+        "required": false
+      }
+    ],
+    "agent_stop": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/agent-stop.py"
+        ],
+        "files": [
+          "./hooks/agent-stop.py"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

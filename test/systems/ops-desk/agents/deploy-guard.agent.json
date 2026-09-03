@@ -1,0 +1,55 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "deploy-guard",
+  "name": "Deploy guard",
+  "description": "Sandboxed deploy preflight.",
+  "sop": "./sops/deploy-guard.sop.md",
+  "skills": [
+    "deploy-plan",
+    "policy-summary"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/security-baseline.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    }
+  ],
+  "mcp_servers": {
+    "deploy-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/deploy-tools.py"
+      ],
+      "files": [
+        "./mcp/deploy-tools.py"
+      ],
+      "tools": [
+        "plan_deploy",
+        "health_check",
+        "rollback_status"
+      ]
+    }
+  },
+  "sandbox": {
+    "required": true,
+    "mode": "read_only"
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

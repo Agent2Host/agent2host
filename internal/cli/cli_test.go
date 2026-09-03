@@ -13,12 +13,17 @@ import (
 	"github.com/agent2host/agent2host/internal/source/fixtures"
 )
 
-func TestCLIRegisterListInspect(t *testing.T) {
-	root, err := fixtures.Root()
+func officialSystem(t *testing.T, name string) string {
+	t.Helper()
+	src, err := fixtures.OfficialSystem(name)
 	if err != nil {
 		t.Fatal(err)
 	}
-	src := filepath.Join(root, "trees", "valid", "club-system")
+	return src
+}
+
+func TestCLIRegisterListInspect(t *testing.T) {
+	src := officialSystem(t, "dev-studio")
 	home := t.TempDir()
 
 	var out, errb bytes.Buffer
@@ -30,7 +35,7 @@ func TestCLIRegisterListInspect(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &reg); err != nil {
 		t.Fatal(err)
 	}
-	if reg["system_id"] != "club-system" {
+	if reg["system_id"] != "dev-studio" {
 		t.Fatalf("register json %+v", reg)
 	}
 	if _, ok := reg["warnings"]; !ok {
@@ -53,13 +58,13 @@ func TestCLIRegisterListInspect(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &listed); err != nil {
 		t.Fatal(err)
 	}
-	if len(listed.Systems) != 1 || listed.Systems[0].ID != "club-system" || listed.Systems[0].AgentCount != 2 {
+	if len(listed.Systems) != 1 || listed.Systems[0].ID != "dev-studio" || listed.Systems[0].AgentCount != 5 {
 		t.Fatalf("list %+v", listed)
 	}
 
 	out.Reset()
 	errb.Reset()
-	code = cli.Main([]string{"a2h", "--home", home, "--json", "inspect", "club-system/club-faq"}, &out, &errb)
+	code = cli.Main([]string{"a2h", "--home", home, "--json", "inspect", "dev-studio/code-reviewer"}, &out, &errb)
 	if code != 0 {
 		t.Fatalf("inspect %d: %s", code, errb.String())
 	}
@@ -67,7 +72,7 @@ func TestCLIRegisterListInspect(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &ins); err != nil {
 		t.Fatal(err)
 	}
-	if ins["agent_id"] != "club-faq" {
+	if ins["agent_id"] != "code-reviewer" {
 		t.Fatalf("inspect %+v", ins)
 	}
 	skills, _ := ins["skills"].([]any)
@@ -77,14 +82,14 @@ func TestCLIRegisterListInspect(t *testing.T) {
 
 	out.Reset()
 	errb.Reset()
-	code = cli.Main([]string{"a2h", "--home", home, "resolve", "club-system/club-faq"}, &out, &errb)
+	code = cli.Main([]string{"a2h", "--home", home, "resolve", "dev-studio/code-reviewer"}, &out, &errb)
 	if code != 0 {
 		t.Fatalf("resolve %d: %s", code, errb.String())
 	}
-	if !strings.Contains(out.String(), `"system_id": "club-system"`) {
+	if !strings.Contains(out.String(), `"system_id": "dev-studio"`) {
 		t.Fatalf("resolve json %s", out.String())
 	}
-	if strings.Contains(out.String(), "unused-declared") {
+	if strings.Contains(out.String(), "unused-catalog") {
 		t.Fatal("resolve JSON must not include unreferenced skill")
 	}
 }
@@ -227,7 +232,7 @@ func TestCLIFailureEmptyStdout(t *testing.T) {
 
 func TestCLICheckRequiresHost(t *testing.T) {
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", t.TempDir(), "check", "club-system/club-faq"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", t.TempDir(), "check", "dev-studio/code-reviewer"}, &out, &errb)
 	if code != cli.ExitUsage || out.Len() != 0 || !strings.Contains(errb.String(), "--host") {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
@@ -238,7 +243,7 @@ func TestCLICheckUnknownHost(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	src := filepath.Join(root, "trees", "valid", "club-system")
+	src := filepath.Join(root, "trees", "valid", "markdown-leading-dashes")
 	home := t.TempDir()
 	var out, errb bytes.Buffer
 	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
@@ -246,18 +251,14 @@ func TestCLICheckUnknownHost(t *testing.T) {
 	}
 	out.Reset()
 	errb.Reset()
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", "not-a-host"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "fm/demo", "--host", "not-a-host"}, &out, &errb)
 	if code != cli.ExitPrecondition || out.Len() != 0 || !strings.Contains(errb.String(), "unsupported host") {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 }
 
 func TestCLICheckJSONPlansNotMaterialized(t *testing.T) {
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(root, "trees", "valid", "markdown-leading-dashes")
+	src := officialSystem(t, "research-lab")
 	home := t.TempDir()
 	var out, errb bytes.Buffer
 	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
@@ -271,7 +272,7 @@ func TestCLICheckJSONPlansNotMaterialized(t *testing.T) {
 
 	out.Reset()
 	errb.Reset()
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "fm/demo", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "research-lab/web-researcher", "--host", "claude-code"}, &out, &errb)
 	if code != 0 {
 		t.Fatalf("check %d: %s\n%s", code, errb.String(), out.String())
 	}
@@ -288,11 +289,7 @@ func TestCLICheckJSONPlansNotMaterialized(t *testing.T) {
 }
 
 func TestCLICheckCodexAllowedWithWarnings(t *testing.T) {
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(root, "trees", "valid", "markdown-leading-dashes")
+	src := officialSystem(t, "dev-studio")
 	home := t.TempDir()
 	var out, errb bytes.Buffer
 	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
@@ -306,7 +303,7 @@ func TestCLICheckCodexAllowedWithWarnings(t *testing.T) {
 
 	out.Reset()
 	errb.Reset()
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "fm/demo", "--host", "codex"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", "codex"}, &out, &errb)
 	if code != 0 {
 		t.Fatalf("codex baseline check must exit 0 (allowed or allowed_with_warnings), got %d: %s\n%s", code, errb.String(), out.String())
 	}
@@ -316,64 +313,42 @@ func TestCLICheckCodexAllowedWithWarnings(t *testing.T) {
 	}
 }
 
-func TestCLICheckClubFAQProjectsScopedSecrets(t *testing.T) {
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(root, "trees", "valid", "club-system")
-	home := t.TempDir()
-	var out, errb bytes.Buffer
-	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
-		t.Fatalf("register %s", errb.String())
-	}
-	restore := cli.SetCheckHostsForTest(committed.New(
-		func(file string) (string, error) { return "/opt/" + file, nil },
-		func(string) (string, error) { return "1.0.0-test", nil },
-	))
+func TestCLICheckProjectsScopedSecrets(t *testing.T) {
+	home, restore := registerOfficialCLI(t, "dev-studio")
 	defer restore()
-	out.Reset()
-	errb.Reset()
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	t.Setenv("A2H_TEST_TOKEN", "token-value-must-not-be-recorded")
+	t.Setenv("A2H_TEST_HOOK_TOKEN", "audit-value-must-not-be-recorded")
+	var out, errb bytes.Buffer
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", "claude-code"}, &out, &errb)
 	if code != 0 {
-		t.Fatalf("scoped MCP/hook secrets must allow, got %d %s", code, out.String())
+		t.Fatalf("code-reviewer default network deny on claude-code must start with warnings, got %d %s", code, out.String())
 	}
 	report := decodeCheckReport(t, out.Bytes())
 	if report.Decision == "refused" {
-		t.Fatalf("club-faq on claude-code must be allowed, got %s", report.Decision)
+		t.Fatalf("code-reviewer on claude-code must not be refused, got %s", report.Decision)
 	}
 	if bytes.Contains(out.Bytes(), []byte("token-value")) || bytes.Contains(out.Bytes(), []byte("audit-value")) {
 		t.Fatal("secret values leaked in check output")
 	}
 }
 
-func TestCLICheckClubFAQAllCommittedHosts(t *testing.T) {
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(root, "trees", "valid", "club-system")
-	home := t.TempDir()
-	var out, errb bytes.Buffer
-	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
-		t.Fatalf("register %s", errb.String())
-	}
-	restore := cli.SetCheckHostsForTest(committed.New(
-		func(file string) (string, error) { return "/opt/" + file, nil },
-		func(string) (string, error) { return "1.0.0-test", nil },
-	))
+func TestCLICheckCodeReviewerAllCommittedHosts(t *testing.T) {
+	home, restore := registerOfficialCLI(t, "dev-studio")
 	defer restore()
 
 	want := map[string]string{
-		"claude-code": "allowed",
-		"kiro":        "allowed",
+		"claude-code": "allowed_with_warnings",
+		"kiro":        "allowed_with_warnings",
 		"codex":       "allowed_with_warnings",
 	}
 	for host, decision := range want {
-		out.Reset()
-		errb.Reset()
-		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", host}, &out, &errb)
-		if code != 0 {
+		var out, errb bytes.Buffer
+		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", host}, &out, &errb)
+		if decision == "refused" {
+			if code != cli.ExitRefused {
+				t.Fatalf("%s check exit %d: %s", host, code, errb.String())
+			}
+		} else if code != 0 {
 			t.Fatalf("%s check exit %d: %s", host, code, errb.String())
 		}
 		report := decodeCheckReport(t, out.Bytes())
@@ -384,11 +359,7 @@ func TestCLICheckClubFAQAllCommittedHosts(t *testing.T) {
 }
 
 func TestCLICheckRefusedNoPlans(t *testing.T) {
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(root, "trees", "valid", "club-system")
+	src := officialSystem(t, "dev-studio")
 	home := t.TempDir()
 	var out, errb bytes.Buffer
 	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
@@ -402,7 +373,7 @@ func TestCLICheckRefusedNoPlans(t *testing.T) {
 
 	out.Reset()
 	errb.Reset()
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitRefused {
 		t.Fatalf("want exit 1, got %d %s", code, errb.String())
 	}
@@ -412,13 +383,9 @@ func TestCLICheckRefusedNoPlans(t *testing.T) {
 	}
 }
 
-func registerClubFAQ(t *testing.T) (home string, restore func()) {
+func registerOfficialCLI(t *testing.T, system string) (home string, restore func()) {
 	t.Helper()
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(root, "trees", "valid", "club-system")
+	src := officialSystem(t, system)
 	home = t.TempDir()
 	var out, errb bytes.Buffer
 	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
@@ -432,12 +399,12 @@ func registerClubFAQ(t *testing.T) (home string, restore func()) {
 }
 
 func TestCLICheckStrictReadRefusesAllCommittedHosts(t *testing.T) {
-	home, restore := registerClubFAQ(t)
+	home, restore := registerOfficialCLI(t, "dev-studio")
 	defer restore()
 	hosts := []string{"claude-code", "kiro", "codex"}
 	for _, host := range hosts {
 		var out, errb bytes.Buffer
-		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", host, "--require-strict-read"}, &out, &errb)
+		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", host, "--require-strict-read"}, &out, &errb)
 		if code != cli.ExitRefused {
 			t.Fatalf("%s strict check exit %d stderr=%s stdout=%s", host, code, errb.String(), out.String())
 		}
@@ -451,21 +418,17 @@ func TestCLICheckStrictReadRefusesAllCommittedHosts(t *testing.T) {
 	}
 }
 
-func TestCLICheckSecurityStrictGuard(t *testing.T) {
-	home := registerAcceptanceFixture(t, "security-strict")
-	restore := cli.SetCheckHostsForTest(committed.New(
-		func(file string) (string, error) { return "/opt/" + file, nil },
-		func(string) (string, error) { return "1.0.0-test", nil },
-	))
+func TestCLICheckDeployGuard(t *testing.T) {
+	home, restore := registerOfficialCLI(t, "ops-desk")
 	defer restore()
 	want := map[string]string{
-		"claude-code": "allowed",
+		"claude-code": "allowed_with_warnings",
 		"kiro":        "refused",
-		"codex":       "refused",
+		"codex":       "allowed_with_warnings",
 	}
 	for host, decision := range want {
 		var out, errb bytes.Buffer
-		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "security-strict/guard", "--host", host}, &out, &errb)
+		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "ops-desk/deploy-guard", "--host", host}, &out, &errb)
 		if decision == "refused" && code != cli.ExitRefused {
 			t.Fatalf("%s exit %d want refused", host, code)
 		}
@@ -479,43 +442,25 @@ func TestCLICheckSecurityStrictGuard(t *testing.T) {
 	}
 }
 
-func registerAcceptanceFixture(t *testing.T, name string) string {
-	t.Helper()
-	root, err := fixtures.Root()
-	if err != nil {
-		t.Fatal(err)
-	}
-	mod, err := filepath.Abs(filepath.Join(root, "..", "..", "..", "..", ".."))
-	if err != nil {
-		t.Fatal(err)
-	}
-	src := filepath.Join(mod, "test", "acceptance", name)
-	if _, err := os.Stat(filepath.Join(src, "system.json")); err != nil {
-		t.Skipf("local test/acceptance/%s not present (test/ is gitignored): %v", name, err)
-	}
-	home := t.TempDir()
-	var out, errb bytes.Buffer
-	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
-		t.Fatalf("register %s: %s", errb.String(), out.String())
-	}
-	return home
-}
-
 func TestCLICheckWithoutStrictReadStillAllowed(t *testing.T) {
-	home, restore := registerClubFAQ(t)
+	home, restore := registerOfficialCLI(t, "dev-studio")
 	defer restore()
 	want := map[string]string{
-		"claude-code": "allowed",
-		"kiro":        "allowed",
+		"claude-code": "allowed_with_warnings",
+		"kiro":        "allowed_with_warnings",
 		"codex":       "allowed_with_warnings",
 	}
 	for host, decision := range want {
 		var out, errb bytes.Buffer
-		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", host}, &out, &errb)
-		if code != 0 {
+		code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", host}, &out, &errb)
+		if decision == "refused" {
+			if code != cli.ExitRefused {
+				t.Fatalf("%s check exit %d: %s", host, code, errb.String())
+			}
+		} else if code != 0 {
 			t.Fatalf("%s check exit %d: %s", host, code, errb.String())
 		}
-		if !strings.Contains(errb.String(), "not strictly confined") {
+		if decision != "refused" && !strings.Contains(errb.String(), "not strictly confined") {
 			t.Fatalf("%s missing ordinary read protection: %s", host, errb.String())
 		}
 		report := decodeCheckReport(t, out.Bytes())

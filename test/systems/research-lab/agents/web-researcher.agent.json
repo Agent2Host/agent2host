@@ -1,0 +1,70 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "web-researcher",
+  "name": "Web researcher",
+  "description": "ReAct web research with fixture search MCP.",
+  "sop": "./sops/web-researcher.sop.md",
+  "skills": [
+    "web-search",
+    "summarize-sources"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/topic-brief.md",
+      "loading": "on_demand"
+    },
+    {
+      "path": "./contexts/research-methodology.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    }
+  ],
+  "mcp_servers": {
+    "web-search": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/web-search.py"
+      ],
+      "files": [
+        "./mcp/web-search.py"
+      ],
+      "tools": [
+        "search_web",
+        "fetch_snippet",
+        "list_sources"
+      ]
+    }
+  },
+  "hooks": {
+    "before_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/before-tool.py"
+        ],
+        "files": [
+          "./hooks/before-tool.py"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "allow"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

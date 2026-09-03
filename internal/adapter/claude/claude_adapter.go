@@ -99,7 +99,8 @@ func claudeProFile() adapter.Profile {
 }
 
 func claudeSecurityPolicy(run *space.ResolvedAgentRun, probe adapter.ProbeResult, intent adapter.ControlIntent, p adapter.Profile) (compatibility.PolicyAssess, compatibility.PolicyAssess) {
-	grant := PermissionsGrantSubseteq(run)
+	ceiling := PermissionsCeiling(run)
+	grant, vs := adapter.PermissionPolicyFields(ceiling)
 	permEnforce := adapter.PermissionsEnforcement(grant, intent)
 	gate := claudeApprovalGate(adapter.ShellExecuteDeclared(run))
 	apprEnforce := adapter.ApprovalsEnforcement(gate, intent, p)
@@ -108,12 +109,13 @@ func claudeSecurityPolicy(run *space.ResolvedAgentRun, probe adapter.ProbeResult
 	// SRC-SEC-INTENT: the projected network deny only covers WebFetch/WebSearch
 	// and curl/wget/nc-shaped Bash. Other shell, MCP, and browser exits stay
 	// open, so this is not complete network isolation.
-	if !grant || adapter.NetworkDenied(run) {
+	if ceiling != adapter.CeilingWithin || adapter.NetworkDenied(run) {
 		permSupport = "approximate"
 	}
 	if !probe.Found {
 		permSupport = "unsupported"
 		grant = false
+		vs = string(adapter.CeilingOvergrant)
 		gate = ""
 	}
 
@@ -123,6 +125,7 @@ func claudeSecurityPolicy(run *space.ResolvedAgentRun, probe adapter.ProbeResult
 		Enforcement:           permEnforce,
 		Confidence:            "documented",
 		GrantSubseteqDeclared: &grant,
+		CeilingVsDeclared:     vs,
 	}
 	appr := compatibility.PolicyAssess{
 		Support:        "mapped",

@@ -2,8 +2,8 @@
   "schema_version": "agent2host/compatibility-report/v1alpha1",
   "agent2host_version": "0.0.0-hc040",
   "subject": {
-    "system_id": "club-system",
-    "agent_id": "club-faq",
+    "system_id": "example-system",
+    "agent_id": "example-agent",
     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
   },
   "host": {
@@ -125,10 +125,10 @@
     "secret_isolation": {
       "items": [
         {
-          "consumer": "/mcp_servers/club-database",
-          "target": "CLUB_DB_TOKEN",
+          "consumer": "/mcp_servers/example-mcp",
+          "target": "A2H_TEST_TOKEN",
           "consumer_kind": "mcp_server",
-          "server_id": "club-database",
+          "server_id": "example-mcp",
           "required": true,
           "support": "mapped",
           "scope": "host",

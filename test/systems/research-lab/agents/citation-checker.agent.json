@@ -1,0 +1,49 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "citation-checker",
+  "name": "Citation checker",
+  "description": "Structured citation validation.",
+  "sop": "./sops/citation-checker.sop.md",
+  "skills": [
+    "cite-sources"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/citation-style.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    }
+  ],
+  "mcp_servers": {
+    "notes-db": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/notes-db.py"
+      ],
+      "files": [
+        "./mcp/notes-db.py"
+      ],
+      "tools": [
+        "search_notes"
+      ]
+    }
+  },
+  "output": {
+    "schema": "./schemas/citation-report.schema.json",
+    "enforcement": "best_effort"
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  }
+}

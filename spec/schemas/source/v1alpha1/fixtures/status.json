@@ -748,8 +748,7 @@
       "required_row": true,
       "validation_layer": "schema",
       "fixture": [
-        "artifact/valid/two-members.json",
-        "trees/valid/club-system/"
+        "artifact/valid/two-members.json"
       ],
       "supporting_checks": [],
       "notes": "Canonical form is schema-checked on Artifact path. Authoring portable_path still allows leading ./ .",
@@ -1300,8 +1299,7 @@
       "validation_layer": "schema",
       "fixture": [
         "valid/secret-mcp-consumer.agent.json",
-        "valid/secret-hook-consumer.agent.json",
-        "trees/valid/club-system/"
+        "valid/secret-hook-consumer.agent.json"
       ],
       "supporting_checks": [],
       "notes": "Schema-valid + expected sidecar. Register/semantic not executed in Node.",
@@ -1327,7 +1325,7 @@
       "required_row": true,
       "validation_layer": "expected_identity",
       "fixture": [
-        "trees/valid/club-system/expected.json"
+        "valid/secret-mcp-consumer.agent.json"
       ],
       "supporting_checks": [
         "Report emit excluded from Source Freeze"

@@ -1,0 +1,50 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "note-synthesizer",
+  "name": "Note synthesizer",
+  "description": "Loop SOP for merging research notes.",
+  "sop": "./sops/note-synthesizer.sop.md",
+  "skills": [
+    "synthesize-notes",
+    "fact-check"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/research-methodology.md",
+      "loading": "on_demand"
+    }
+  ],
+  "mcp_servers": {
+    "notes-db": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/notes-db.py"
+      ],
+      "files": [
+        "./mcp/notes-db.py"
+      ],
+      "tools": [
+        "save_note",
+        "search_notes",
+        "link_notes",
+        "list_tags"
+      ]
+    }
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "deny"
+    }
+  }
+}

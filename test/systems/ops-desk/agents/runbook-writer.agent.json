@@ -1,0 +1,35 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "runbook-writer",
+  "name": "Runbook writer",
+  "description": "Structured operational runbooks.",
+  "sop": "./sops/runbook-writer.sop.md",
+  "skills": [
+    "runbook-draft",
+    "policy-summary"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/escalation-matrix.md",
+      "loading": "on_demand"
+    }
+  ],
+  "output": {
+    "schema": "./schemas/runbook.schema.json",
+    "enforcement": "best_effort"
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": [
+        "working_directory"
+      ]
+    },
+    "network": {
+      "default": "deny"
+    }
+  }
+}

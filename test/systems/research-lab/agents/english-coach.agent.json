@@ -1,0 +1,49 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "english-coach",
+  "name": "English coach",
+  "description": "Vocabulary and grammar drills — no web MCP.",
+  "sop": "./sops/english-coach.sop.md",
+  "skills": [
+    "english-drill"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/english-rubric.md",
+      "loading": "on_demand"
+    }
+  ],
+  "mcp_servers": {
+    "translate-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/translate-tools.py"
+      ],
+      "files": [
+        "./mcp/translate-tools.py"
+      ],
+      "tools": [
+        "lookup_word",
+        "suggest_example",
+        {
+          "name": "score_grammar",
+          "required": false
+        }
+      ]
+    }
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  }
+}

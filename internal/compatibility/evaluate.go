@@ -438,9 +438,22 @@ func evalPolicy(kind string, required bool, a PolicyAssess) PolicyRow {
 	}
 	switch kind {
 	case "permissions":
-		if a.GrantSubseteqDeclared != nil && !*a.GrantSubseteqDeclared {
+		ceiling := a.CeilingVsDeclared
+		if ceiling == "" && a.GrantSubseteqDeclared != nil {
+			if *a.GrantSubseteqDeclared {
+				ceiling = "within"
+			} else {
+				ceiling = "overgrant"
+			}
+		}
+		switch ceiling {
+		case "overgrant":
 			row.RequirementResult = resultUnsatisfied
 			row.ReasonCode = "permission_overgrant"
+			return row
+		case "unverified":
+			row.RequirementResult = resultDegraded
+			row.ReasonCode = "insufficient_evidence"
 			return row
 		}
 	case "approvals":

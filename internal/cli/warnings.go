@@ -125,6 +125,8 @@ func warningMessage(code string) string {
 		return "Some behavior was inferred for this Host version and has not been directly verified."
 	case "permission_overgrant":
 		return "This Host may allow more access than the Agent requested."
+	case "insufficient_evidence":
+		return "Some requested restrictions are unverified. Agent2Host does not guarantee they are in force."
 	default:
 		return "Some requested Agent behavior may differ on this Host."
 	}

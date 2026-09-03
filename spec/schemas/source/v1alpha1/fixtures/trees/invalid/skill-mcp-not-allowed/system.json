@@ -13,7 +13,7 @@
       "document": "./skills/search-policy.skill.md",
       "mcp_tools": [
         {
-          "server_id": "club-database",
+          "server_id": "example-mcp",
           "tool_name": "search_policy"
         }
       ]

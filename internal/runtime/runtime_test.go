@@ -326,7 +326,7 @@ func TestPrepareDoesNotClobberLiveRunSecrets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rel := "kiro-home/agents/club-faq.json"
+	rel := "kiro-home/agents/example-agent.json"
 	plan := []byte(`{"env":{"T":"` + adapter.SecretPlaceholder("T") + `"}}` + "\n")
 	if err := persistSecretBaselines(p, adapter.NativeProjectionPlan{
 		Files: []adapter.ProjectionFile{{
@@ -615,16 +615,16 @@ func TestOptionalSecretOmitted(t *testing.T) {
 
 func TestResolveSecretsScopesMCPConsumer(t *testing.T) {
 	got, err := resolveSecrets([]adapter.SecretRef{{
-		Name: "CLUB_DB_TOKEN", Consumer: "/mcp_servers/club-database", Required: true,
+		Name: "A2H_TEST_TOKEN", Consumer: "/mcp_servers/example-mcp", Required: true,
 	}}, func(string) string { return "secret-value" })
-	if err != nil || len(got.env) != 0 || got.values["CLUB_DB_TOKEN"] != "secret-value" {
+	if err != nil || len(got.env) != 0 || got.values["A2H_TEST_TOKEN"] != "secret-value" {
 		t.Fatalf("%+v %v", got, err)
 	}
 }
 
 func TestResolveSecretsOmitsMissingOptionalMCP(t *testing.T) {
 	got, err := resolveSecrets([]adapter.SecretRef{{
-		Name: "CLUB_DB_TOKEN", Consumer: "/mcp_servers/club-database", Required: false,
+		Name: "A2H_TEST_TOKEN", Consumer: "/mcp_servers/example-mcp", Required: false,
 	}}, func(string) string { return "" })
 	if err != nil || len(got.env) != 0 || len(got.omitted) != 1 {
 		t.Fatalf("%+v %v", got, err)

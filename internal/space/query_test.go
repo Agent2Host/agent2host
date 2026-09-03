@@ -69,8 +69,8 @@ func TestListInspectResolve(t *testing.T) {
 }
 
 func TestParseTarget(t *testing.T) {
-	sys, ag, err := space.ParseTarget("club-system/club-faq")
-	if err != nil || sys != "club-system" || ag != "club-faq" {
+	sys, ag, err := space.ParseTarget("example-system/example-agent")
+	if err != nil || sys != "example-system" || ag != "example-agent" {
 		t.Fatalf("%s %s %v", sys, ag, err)
 	}
 	if _, _, err := space.ParseTarget("noshift"); err == nil {
@@ -103,12 +103,12 @@ func TestInspectCorruptFailsClosed(t *testing.T) {
 	}
 }
 
-func TestClubSystemClosureOnly(t *testing.T) {
+func TestDevStudioClosureOnly(t *testing.T) {
 	sp, err := space.Open(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
-	src := fixtureTree(t, "valid", "club-system")
+	src := officialSystem(t, "dev-studio")
 	rep, err := sp.Register(src)
 	if err != nil {
 		t.Fatal(err)
@@ -117,74 +117,74 @@ func TestClubSystemClosureOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(listed) != 1 || listed[0].ID != "club-system" || listed[0].AgentCount != 2 {
+	if len(listed) != 1 || listed[0].ID != "dev-studio" || listed[0].AgentCount != 5 {
 		t.Fatalf("list %+v", listed)
 	}
 
-	faq, err := sp.Resolve("club-system", "club-faq", "")
+	rev, err := sp.Resolve("dev-studio", "code-reviewer", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if faq.ArtifactRevision != rep.Revision {
-		t.Fatalf("revision %s", faq.ArtifactRevision)
+	if rev.ArtifactRevision != rep.Revision {
+		t.Fatalf("revision %s", rev.ArtifactRevision)
 	}
 	got := []string{}
-	for _, sk := range faq.Skills {
+	for _, sk := range rev.Skills {
 		got = append(got, sk.ID)
 	}
-	if len(got) != 2 || got[0] != "search-policy" || got[1] != "verify-member" {
-		t.Fatalf("faq skills %v", got)
+	if len(got) != 2 || got[0] != "code-review" || got[1] != "api-design-check" {
+		t.Fatalf("reviewer skills %v", got)
 	}
-	if faq.Skills[1].Required {
-		t.Fatal("verify-member is optional")
+	if rev.Skills[1].Required {
+		t.Fatal("api-design-check is optional")
 	}
-	if faq.Skills[0].Name != "Search policy" || faq.Skills[0].Description == "" {
-		t.Fatalf("skill name/description %+v", faq.Skills[0])
+	if rev.Skills[0].Name != "Code review" || rev.Skills[0].Description == "" {
+		t.Fatalf("skill name/description %+v", rev.Skills[0])
 	}
-	if len(faq.Skills[0].MCPTools) == 0 {
+	if len(rev.Skills[0].MCPTools) == 0 {
 		t.Fatal("skill mcp_tools must be in IR")
 	}
-	if len(faq.Contexts) != 1 || faq.Contexts[0].Path != "contexts/club-handbook.md" {
-		t.Fatalf("contexts %+v", faq.Contexts)
+	if len(rev.Contexts) < 1 || rev.Contexts[0].Path != "contexts/eng-handbook.md" {
+		t.Fatalf("contexts %+v", rev.Contexts)
 	}
-	if faq.Contexts[0].Loading == nil || *faq.Contexts[0].Loading != "on_demand" {
-		t.Fatalf("context loading %+v", faq.Contexts[0])
+	if rev.Contexts[0].Loading == nil || *rev.Contexts[0].Loading != "on_demand" {
+		t.Fatalf("context loading %+v", rev.Contexts[0])
 	}
-	if faq.Contexts[0].Isolation == nil || *faq.Contexts[0].Isolation != "required" {
-		t.Fatalf("context isolation %+v", faq.Contexts[0])
+	if rev.Contexts[0].Isolation == nil || *rev.Contexts[0].Isolation != "required" {
+		t.Fatalf("context isolation %+v", rev.Contexts[0])
 	}
-	mcp, ok := faq.MCPServers["club-database"]
+	mcp, ok := rev.MCPServers["repo-tools"]
 	if !ok || len(mcp.Environment) == 0 {
-		t.Fatalf("mcp environment %+v", faq.MCPServers)
+		t.Fatalf("mcp environment %+v", rev.MCPServers)
 	}
-	if len(mcp.Tools) == 0 || mcp.Tools[0].Required == nil {
-		t.Fatal("mcp tool required flags must be preserved")
+	if len(mcp.Tools) == 0 {
+		t.Fatal("mcp tools must be preserved")
 	}
-	if _, ok := faq.Content["system.json"]; ok {
+	if _, ok := rev.Content["system.json"]; ok {
 		t.Fatal("Content must not expose full system.json")
 	}
-	if _, ok := faq.Content["skills/unused-declared.skill.md"]; ok {
+	if _, ok := rev.Content["skills/unused-catalog.skill.md"]; ok {
 		t.Fatal("unreferenced skill must not be in resolve closure")
 	}
-	if _, ok := faq.Content["agents/club-admin.agent.json"]; ok {
+	if _, ok := rev.Content["agents/implementer.agent.json"]; ok {
 		t.Fatal("other Named Agent spec must not be in resolve Content")
 	}
-	if faq.Content["agents/club-faq.agent.json"] == nil {
+	if rev.Content["agents/code-reviewer.agent.json"] == nil {
 		t.Fatal("selected Agent spec must be in resolve Content")
 	}
-	if faq.Content["skills/search-policy.skill.md"] == nil || faq.Content["mcp/club-database.py"] == nil {
+	if rev.Content["skills/code-review.skill.md"] == nil || rev.Content["mcp/repo-tools.py"] == nil {
 		t.Fatal("referenced files must be inlined")
 	}
 
-	admin, err := sp.Resolve("club-system", "club-admin", "")
+	notes, err := sp.Resolve("dev-studio", "release-notes", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(admin.Skills) != 1 || admin.Skills[0].ID != "search-policy" {
-		t.Fatalf("admin skills %+v", admin.Skills)
+	if len(notes.Skills) != 1 || notes.Skills[0].ID != "changelog-draft" {
+		t.Fatalf("release-notes skills %+v", notes.Skills)
 	}
 
-	ins, err := sp.Inspect("club-system", "club-faq")
+	ins, err := sp.Inspect("dev-studio", "code-reviewer")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -192,7 +192,6 @@ func TestClubSystemClosureOnly(t *testing.T) {
 		t.Fatalf("inspect skills %v", ins.Skills)
 	}
 
-	// Artifact still packs the unreferenced skill.
 	st, err := store.New(sp.Home)
 	if err != nil {
 		t.Fatal(err)
@@ -201,7 +200,7 @@ func TestClubSystemClosureOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := art.Payload["skills/unused-declared.skill.md"]; !ok {
+	if _, ok := art.Payload["skills/unused-catalog.skill.md"]; !ok {
 		t.Fatal("artifact must pack declared unused skill")
 	}
 }
@@ -231,28 +230,28 @@ func TestAgentExistenceFromArtifactNotRegistryIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := sp.Register(fixtureTree(t, "valid", "club-system")); err != nil {
+	if _, err := sp.Register(officialSystem(t, "dev-studio")); err != nil {
 		t.Fatal(err)
 	}
 
-	rewriteAgents(t, home, "club-system", []string{"club-faq"})
-	if _, err := sp.Resolve("club-system", "club-admin", ""); err != nil {
-		t.Fatalf("artifact still has club-admin: %v", err)
+	rewriteAgents(t, home, "dev-studio", []string{"code-reviewer"})
+	if _, err := sp.Resolve("dev-studio", "implementer", ""); err != nil {
+		t.Fatalf("artifact still has implementer: %v", err)
 	}
-	ins, err := sp.Inspect("club-system", "club-admin")
+	ins, err := sp.Inspect("dev-studio", "implementer")
 	if err != nil {
 		t.Fatalf("inspect must follow Artifact, not registry index: %v", err)
 	}
-	if len(ins.Agents) != 1 || ins.Agents[0] != "club-faq" {
+	if len(ins.Agents) != 1 || ins.Agents[0] != "code-reviewer" {
 		t.Fatalf("inspect Agents are registry facts: %+v", ins.Agents)
 	}
 
-	rewriteAgents(t, home, "club-system", []string{"club-faq", "ghost"})
+	rewriteAgents(t, home, "dev-studio", []string{"code-reviewer", "ghost"})
 	var se *space.Error
-	if _, err := sp.Resolve("club-system", "ghost", ""); !errors.As(err, &se) || se.Kind != space.KindUnknownAgent {
+	if _, err := sp.Resolve("dev-studio", "ghost", ""); !errors.As(err, &se) || se.Kind != space.KindUnknownAgent {
 		t.Fatalf("ghost resolve: %v", err)
 	}
-	if _, err := sp.Inspect("club-system", "ghost"); !errors.As(err, &se) || se.Kind != space.KindUnknownAgent {
+	if _, err := sp.Inspect("dev-studio", "ghost"); !errors.As(err, &se) || se.Kind != space.KindUnknownAgent {
 		t.Fatalf("ghost inspect: %v", err)
 	}
 }

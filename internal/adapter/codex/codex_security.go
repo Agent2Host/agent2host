@@ -5,29 +5,26 @@ import (
 	"github.com/agent2host/agent2host/internal/space"
 )
 
-// codexPermissionsGrantSubseteq reports whether the projected permission
-// profile stays within the declared permission ceiling for the V0 slice.
-func PermissionsGrantSubseteq(run *space.ResolvedAgentRun) bool {
-	if run == nil {
-		return false
+// SessionNetwork reports the generated Codex permission profile.
+// Official key: permissions.<name>.network.enabled
+// (https://developers.openai.com/codex/permissions).
+func SessionNetwork(run *space.ResolvedAgentRun) adapter.SessionEffect {
+	if adapter.NetworkDenied(run) {
+		return adapter.EffectDeny
 	}
-	return adapter.FSCeilingWorkingDirectoryOnly(run) && adapter.NetworkDenied(run)
+	return adapter.EffectSilent
 }
 
-func ApprovalGateVsDeclared(shell string, grantSubseteq bool) string {
-	switch shell {
-	case "never":
-		return "equal"
-	case "on_boundary":
-		// on_boundary is satisfied when out-of-bound Shell is denied by
-		// permissions/sandbox; Codex on-request is equal only with a clean grant.
-		if grantSubseteq {
-			return "equal"
-		}
-		return "weaker"
-	case "always":
-		return "weaker"
-	default:
-		return "weaker"
+func PermissionsCeiling(run *space.ResolvedAgentRun) adapter.CeilingResult {
+	if run == nil {
+		return adapter.ComparePermissions(run, adapter.SessionFacts{Network: adapter.EffectUnknown})
 	}
+	return adapter.ComparePermissions(run, adapter.SessionFacts{Network: SessionNetwork(run)})
+}
+
+// ApprovalGateVsDeclared reports whether authorized shell is usable.
+// Host asking less often than Source "always" is not a failure: authorized
+// work may run silently; extra Host prompts are also fine.
+func ApprovalGateVsDeclared(string) string {
+	return "equal"
 }

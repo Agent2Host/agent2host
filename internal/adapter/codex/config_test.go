@@ -12,8 +12,8 @@ import (
 func testRun() *space.ResolvedAgentRun {
 	sr := false
 	return &space.ResolvedAgentRun{
-		SystemID: "club-system",
-		AgentID:  "club-faq",
+		SystemID: "example-system",
+		AgentID:  "example-agent",
 		SOP:      "sops/a.sop.md",
 		Content:  map[string][]byte{"sops/a.sop.md": []byte("# sop\n")},
 		Sandbox:  &decode.Sandbox{Required: &sr},

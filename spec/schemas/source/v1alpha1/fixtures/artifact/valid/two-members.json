@@ -7,7 +7,7 @@
       "type": "file"
     },
     {
-      "path": "agents/club-faq.agent.json",
+      "path": "agents/example-agent.agent.json",
       "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "type": "file"
     }

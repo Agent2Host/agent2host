@@ -1,0 +1,91 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "AgentSystem",
+  "id": "dev-studio",
+  "name": "Development studio",
+  "description": "Multi-agent software engineering workbench for integration testing.",
+  "version": "0.1.0",
+  "agents": [
+    "./agents/code-reviewer.agent.json",
+    "./agents/implementer.agent.json",
+    "./agents/git-helper.agent.json",
+    "./agents/test-runner.agent.json",
+    "./agents/release-notes.agent.json"
+  ],
+  "defaults": {
+    "context_access": "explicit",
+    "cross_system_access": "deny"
+  },
+  "skills": {
+    "code-review": {
+      "name": "Code review",
+      "description": "Multi-axis review before merge.",
+      "document": "./skills/code-review.skill.md",
+      "contexts": ["./contexts/review-checklist.md"],
+      "mcp_tools": [
+        {"server_id": "repo-tools", "tool_name": "list_changed_files"},
+        {"server_id": "repo-tools", "tool_name": "get_diff_summary"}
+      ]
+    },
+    "debugging": {
+      "name": "Debugging",
+      "description": "Systematic triage for failures.",
+      "document": "./skills/debugging.skill.md",
+      "scripts": ["./scripts/repro-hint.py"],
+      "mcp_tools": [
+        {"server_id": "repo-tools", "tool_name": "get_diff_summary"}
+      ]
+    },
+    "commit-message": {
+      "name": "Commit message",
+      "description": "Draft conventional commit messages.",
+      "document": "./skills/commit-message.skill.md",
+      "contexts": ["./contexts/git-conventions.md"],
+      "mcp_tools": [
+        {"server_id": "git-tools", "tool_name": "suggest_commit_message"},
+        {"server_id": "git-tools", "tool_name": "list_staged_files"}
+      ]
+    },
+    "test-triage": {
+      "name": "Test triage",
+      "description": "Plan and interpret test runs.",
+      "document": "./skills/test-triage.skill.md",
+      "scripts": ["./scripts/lint-stub.py"],
+      "mcp_tools": [
+        {"server_id": "ci-tools", "tool_name": "plan_test_matrix"},
+        {"server_id": "ci-tools", "tool_name": "get_lint_summary"}
+      ]
+    },
+    "changelog-draft": {
+      "name": "Changelog draft",
+      "description": "User-facing release notes from changes.",
+      "document": "./skills/changelog-draft.skill.md",
+      "assets": ["./assets/glossary.txt"]
+    },
+    "refactor-guide": {
+      "name": "Refactor guide",
+      "description": "Safe refactor steps without behavior change.",
+      "document": "./skills/refactor-guide.skill.md",
+      "contexts": ["./contexts/arch-overview.md"]
+    },
+    "branch-hygiene": {
+      "name": "Branch hygiene",
+      "description": "Branch and staging hygiene before push.",
+      "document": "./skills/branch-hygiene.skill.md",
+      "mcp_tools": [
+        {"server_id": "git-tools", "tool_name": "branch_status"}
+      ]
+    },
+    "api-design-check": {
+      "name": "API design check",
+      "description": "Review public API surface changes.",
+      "document": "./skills/api-design-check.skill.md",
+      "contexts": ["./contexts/style-guide.md"]
+    },
+    "unused-catalog": {
+      "name": "Unused catalog",
+      "description": "Declared but unreferenced skill for registry coverage.",
+      "document": "./skills/unused-catalog.skill.md"
+    }
+  }
+}

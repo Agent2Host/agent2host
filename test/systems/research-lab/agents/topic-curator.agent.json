@@ -1,0 +1,92 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "topic-curator",
+  "name": "Topic curator",
+  "description": "Curate reading lists from notes DB.",
+  "sop": "./sops/topic-curator.sop.md",
+  "skills": [
+    "summarize-sources",
+    {
+      "id": "fact-check",
+      "required": false
+    }
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/topic-brief.md",
+      "loading": "on_demand"
+    },
+    {
+      "path": "./contexts/source-trust-guide.md",
+      "loading": "on_demand"
+    }
+  ],
+  "mcp_servers": {
+    "notes-db": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/notes-db.py"
+      ],
+      "files": [
+        "./mcp/notes-db.py"
+      ],
+      "tools": [
+        "list_tags",
+        "link_notes",
+        "search_notes"
+      ]
+    },
+    "web-search": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/web-search.py"
+      ],
+      "files": [
+        "./mcp/web-search.py"
+      ],
+      "tools": [
+        "list_sources"
+      ]
+    }
+  },
+  "hooks": {
+    "session_start": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/session-start.py"
+        ],
+        "files": [
+          "./hooks/session-start.py"
+        ]
+      }
+    ],
+    "agent_stop": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/agent-stop.py"
+        ],
+        "files": [
+          "./hooks/agent-stop.py"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  }
+}

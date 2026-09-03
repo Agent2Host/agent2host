@@ -1,0 +1,96 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "AgentSystem",
+  "id": "ops-desk",
+  "name": "Operations desk",
+  "description": "Deploy, incident, config audit, and batch runbooks — security-heavy corpus.",
+  "version": "0.1.0",
+  "agents": [
+    "./agents/deploy-guard.agent.json",
+    "./agents/incident-responder.agent.json",
+    "./agents/config-auditor.agent.json",
+    "./agents/batch-runner.agent.json",
+    "./agents/runbook-writer.agent.json"
+  ],
+  "skills": {
+    "deploy-plan": {
+      "name": "Deploy plan",
+      "description": "Preflight and deploy steps.",
+      "document": "./skills/deploy-plan.skill.md",
+      "contexts": [
+        "./contexts/deploy-checklist.md"
+      ],
+      "mcp_tools": [
+        {
+          "server_id": "deploy-tools",
+          "tool_name": "plan_deploy"
+        },
+        {
+          "server_id": "deploy-tools",
+          "tool_name": "health_check"
+        }
+      ]
+    },
+    "incident-triage": {
+      "name": "Incident triage",
+      "description": "First-response incident workflow.",
+      "document": "./skills/incident-triage.skill.md",
+      "contexts": [
+        "./contexts/incident-playbook.md"
+      ],
+      "mcp_tools": [
+        {
+          "server_id": "audit-log",
+          "tool_name": "append_event"
+        },
+        {
+          "server_id": "audit-log",
+          "tool_name": "query_events"
+        }
+      ]
+    },
+    "config-audit": {
+      "name": "Config audit",
+      "description": "Validate project configuration.",
+      "document": "./skills/config-audit.skill.md",
+      "contexts": [
+        "./contexts/config-standards.md"
+      ]
+    },
+    "batch-checklist": {
+      "name": "Batch checklist",
+      "description": "Multi-step batch verification.",
+      "document": "./skills/batch-checklist.skill.md",
+      "scripts": [
+        "./scripts/checklist-tick.py"
+      ],
+      "mcp_tools": [
+        {
+          "server_id": "deploy-tools",
+          "tool_name": "rollback_status"
+        }
+      ]
+    },
+    "runbook-draft": {
+      "name": "Runbook draft",
+      "description": "Author operational runbooks.",
+      "document": "./skills/runbook-draft.skill.md",
+      "contexts": [
+        "./contexts/escalation-matrix.md"
+      ]
+    },
+    "policy-summary": {
+      "name": "Policy summary",
+      "description": "Summarize security baseline for operators.",
+      "document": "./skills/policy-summary.skill.md",
+      "contexts": [
+        "./contexts/security-baseline.md"
+      ]
+    },
+    "unused-ops": {
+      "name": "Unused ops",
+      "description": "Registry placeholder.",
+      "document": "./skills/unused-ops.skill.md"
+    }
+  }
+}

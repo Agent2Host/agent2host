@@ -1,0 +1,74 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "AgentSystem",
+  "id": "research-lab",
+  "name": "Research lab",
+  "description": "Web research, notes, citations, and English practice — mixed SOP styles.",
+  "version": "0.1.0",
+  "agents": [
+    "./agents/web-researcher.agent.json",
+    "./agents/note-synthesizer.agent.json",
+    "./agents/citation-checker.agent.json",
+    "./agents/english-coach.agent.json",
+    "./agents/topic-curator.agent.json"
+  ],
+  "skills": {
+    "web-search": {
+      "name": "Web search",
+      "description": "Search and fetch fixture web sources.",
+      "document": "./skills/web-search.skill.md",
+      "contexts": ["./contexts/source-trust-guide.md"],
+      "mcp_tools": [
+        {"server_id": "web-search", "tool_name": "search_web"},
+        {"server_id": "web-search", "tool_name": "fetch_snippet"}
+      ]
+    },
+    "synthesize-notes": {
+      "name": "Synthesize notes",
+      "description": "Merge sources into structured notes.",
+      "document": "./skills/synthesize-notes.skill.md",
+      "contexts": ["./contexts/research-methodology.md"],
+      "mcp_tools": [
+        {"server_id": "notes-db", "tool_name": "save_note"},
+        {"server_id": "notes-db", "tool_name": "search_notes"}
+      ]
+    },
+    "cite-sources": {
+      "name": "Cite sources",
+      "description": "Format citations per style guide.",
+      "document": "./skills/cite-sources.skill.md",
+      "contexts": ["./contexts/citation-style.md"]
+    },
+    "english-drill": {
+      "name": "English drill",
+      "description": "Vocabulary and grammar practice.",
+      "document": "./skills/english-drill.skill.md",
+      "contexts": ["./contexts/english-rubric.md"],
+      "mcp_tools": [
+        {"server_id": "translate-tools", "tool_name": "lookup_word"},
+        {"server_id": "translate-tools", "tool_name": "suggest_example"}
+      ]
+    },
+    "summarize-sources": {
+      "name": "Summarize sources",
+      "description": "Executive summary from multiple hits.",
+      "document": "./skills/summarize-sources.skill.md",
+      "scripts": ["./scripts/normalize-source.py"],
+      "mcp_tools": [{"server_id": "web-search", "tool_name": "list_sources"}]
+    },
+    "fact-check": {
+      "name": "Fact check",
+      "description": "Cross-check claims against notes.",
+      "document": "./skills/fact-check.skill.md",
+      "mcp_tools": [
+        {"server_id": "notes-db", "tool_name": "search_notes"},
+        {"server_id": "notes-db", "tool_name": "link_notes"}
+      ]
+    },
+    "unused-research": {
+      "name": "Unused research",
+      "description": "Registry placeholder.",
+      "document": "./skills/unused-research.skill.md"
+    }
+  }
+}

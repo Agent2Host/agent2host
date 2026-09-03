@@ -1,10 +1,10 @@
 {
   "secret_isolation": [
     {
-      "consumer": "/mcp_servers/club-database",
-      "target": "CLUB_DB_TOKEN",
+      "consumer": "/mcp_servers/example-mcp",
+      "target": "A2H_TEST_TOKEN",
       "consumer_kind": "mcp_server",
-      "server_id": "club-database",
+      "server_id": "example-mcp",
       "required": false,
       "support": "mapped",
       "scope": "host",

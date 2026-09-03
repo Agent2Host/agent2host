@@ -23,11 +23,11 @@ func TestPutFirstAndSameProvenance(t *testing.T) {
 		Agents:         []string{"faq"},
 	}
 	if err := reg.WithWrite(func(doc *registry.Document) error {
-		return registry.Put(doc, "club-system", rec)
+		return registry.Put(doc, "example-system", rec)
 	}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := reg.Get("club-system")
+	got, err := reg.Get("example-system")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,11 +38,11 @@ func TestPutFirstAndSameProvenance(t *testing.T) {
 	rec.ActiveRevision = "sha256:" + "c" + "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 	rec.Version = "0.2.0"
 	if err := reg.WithWrite(func(doc *registry.Document) error {
-		return registry.Put(doc, "club-system", rec)
+		return registry.Put(doc, "example-system", rec)
 	}); err != nil {
 		t.Fatal(err)
 	}
-	got, err = reg.Get("club-system")
+	got, err = reg.Get("example-system")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestPutDifferentProvenanceRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := reg.WithWrite(func(doc *registry.Document) error {
-		return registry.Put(doc, "club-system", registry.Record{
+		return registry.Put(doc, "example-system", registry.Record{
 			ActiveRevision: "sha256:" + "a" + "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 			Source:         "/src/a",
 			Version:        "0.1.0",
@@ -67,7 +67,7 @@ func TestPutDifferentProvenanceRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 	err = reg.WithWrite(func(doc *registry.Document) error {
-		return registry.Put(doc, "club-system", registry.Record{
+		return registry.Put(doc, "example-system", registry.Record{
 			ActiveRevision: "sha256:" + "d" + "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 			Source:         "/src/b",
 			Version:        "0.1.0",
@@ -78,7 +78,7 @@ func TestPutDifferentProvenanceRefused(t *testing.T) {
 	if !errors.As(err, &re) || re.Kind != registry.KindProvenance {
 		t.Fatalf("got %v", err)
 	}
-	got, err := reg.Get("club-system")
+	got, err := reg.Get("example-system")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func TestIllegalRevisionRejected(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	raw := []byte(`{"systems":{"club-system":{"active_revision":"../artifacts/x","source":"/tmp/src","version":"1.0.0","agents":["a"]}}}` + "\n")
+	raw := []byte(`{"systems":{"example-system":{"active_revision":"../artifacts/x","source":"/tmp/src","version":"1.0.0","agents":["a"]}}}` + "\n")
 	if err := os.WriteFile(filepath.Join(dir, "registry.json"), raw, 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +234,7 @@ func TestLockSystemThenWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	unlock, err := reg.LockSystem("club-system")
+	unlock, err := reg.LockSystem("example-system")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +244,7 @@ func TestLockSystemThenWrite(t *testing.T) {
 		}
 	}()
 	if err := reg.WithWrite(func(doc *registry.Document) error {
-		return registry.Put(doc, "club-system", registry.Record{
+		return registry.Put(doc, "example-system", registry.Record{
 			ActiveRevision: "sha256:" + "f" + "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 			Source:         "/src/club",
 			Version:        "0.1.0",

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "highlights"],
+  "properties": {
+    "version": {"type": "string", "minLength": 1},
+    "highlights": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1
+    },
+    "breaking": {"type": "array", "items": {"type": "string"}}
+  }
+}

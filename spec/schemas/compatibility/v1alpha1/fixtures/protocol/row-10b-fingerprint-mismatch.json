@@ -2,8 +2,8 @@
   "case": "10b",
   "existing_report": {
     "subject": {
-      "system_id": "club-system",
-      "agent_id": "club-faq",
+      "system_id": "example-system",
+      "agent_id": "example-agent",
       "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
     },
     "probe": {
@@ -16,8 +16,8 @@
   },
   "current_binding": {
     "subject": {
-      "system_id": "club-system",
-      "agent_id": "club-faq",
+      "system_id": "example-system",
+      "agent_id": "example-agent",
       "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
     },
     "probe": {

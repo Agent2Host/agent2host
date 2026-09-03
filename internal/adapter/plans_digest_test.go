@@ -11,7 +11,7 @@ import (
 func TestProjectDigestStableAcrossGenerations(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
 	req := true
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	run.Contexts = []space.ResolvedContext{
 		{Path: "contexts/z-notes.md", Required: &req},
 		{Path: "contexts/a-handbook.md", Required: &req},

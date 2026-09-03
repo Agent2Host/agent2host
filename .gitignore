@@ -20,6 +20,9 @@ credentials.json
 .a2h/
 a2h-home/
 
+# Local `go build -o a2h` binary (README build command)
+/a2h
+
 # Go
 *.test
 *.out
@@ -58,5 +61,9 @@ temp/
 
 # Personal notes (not an implementation driver)
 learning/
-test/
 problems/
+
+# Local-only test extras. Official acceptance systems are committed.
+test/*
+!test/systems/
+!test/systems/**/

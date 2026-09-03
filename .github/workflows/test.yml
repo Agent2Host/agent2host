@@ -27,6 +27,23 @@ jobs:
       - name: Compatibility report fixtures
         working-directory: spec/schemas/compatibility/v1alpha1/fixtures
         run: npm ci && npm test
+      - name: Official systems hygiene
+        run: |
+          test -f test/systems/dev-studio/system.json
+          test -f test/systems/ops-desk/system.json
+          test -f test/systems/research-lab/system.json
+          if grep -R -nE 'club-system|club-faq|club-admin|club-database|basic-system|security-strict' test/systems README.md cmd; then
+            echo "forbidden fake-system identity still present" >&2
+            exit 1
+          fi
+          if grep -R --include='*.go' -nE 'club-system|club-faq|club-admin|club-database|basic-system|security-strict' internal; then
+            echo "forbidden fake-system identity still present in Go tests" >&2
+            exit 1
+          fi
+          if grep -R -nE 'BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]+' test/systems; then
+            echo "secret-like material in official systems" >&2
+            exit 1
+          fi
       - name: Go format
         run: test -z "$(gofmt -l .)"
       - name: Go vet

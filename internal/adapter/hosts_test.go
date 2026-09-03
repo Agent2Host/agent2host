@@ -3,7 +3,6 @@ package adapter_test
 import (
 	"encoding/json"
 	"errors"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -32,13 +31,22 @@ func missingLook() adapter.LookPathFunc {
 
 func stubVersion(string) (string, error) { return "1.0.0-test", nil }
 
+func withNetworkAllow(run *space.ResolvedAgentRun) *space.ResolvedAgentRun {
+	allow := "allow"
+	if run.Permissions == nil {
+		run.Permissions = &decode.Permissions{}
+	}
+	run.Permissions.Network = &decode.NetworkPermissions{Default: &allow}
+	return run
+}
+
 func sampleRun(sandboxRequired bool, extraSkill bool) *space.ResolvedAgentRun {
 	sr := sandboxRequired
 	run := &space.ResolvedAgentRun{
-		SystemID:         "club-system",
-		AgentID:          "club-faq",
-		Name:             "Club FAQ",
-		Description:      "I can help with club events, registration, and policies.",
+		SystemID:         "example-system",
+		AgentID:          "example-agent",
+		Name:             "Example Agent",
+		Description:      "Example agent used by unit tests.",
 		ArtifactRevision: digestN(1),
 		SOP:              "sops/a.sop.md",
 		Skills: []space.ResolvedSkill{
@@ -76,7 +84,7 @@ func TestDefaultRegistryIDs(t *testing.T) {
 
 func TestClaudeCodeAllowedProjects(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	run := sampleRun(true, false)
+	run := withNetworkAllow(sampleRun(true, false))
 	out, err := adapter.RunPipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
@@ -111,11 +119,11 @@ func TestClaudeCodeAllowedProjects(t *testing.T) {
 			}
 		}
 	}
-	agentCardRel := claude.AgentsDirRel + "/club-faq.md"
+	agentCardRel := claude.AgentsDirRel + "/example-agent.md"
 	if !rels["CLAUDE.md"] || !rels[claude.SkillsDirRel+"/search-policy/SKILL.md"] || !rels[agentCardRel] {
 		t.Fatalf("files %v", rels)
 	}
-	if rels[".claude/agents/club-faq.md"] {
+	if rels[".claude/agents/example-agent.md"] {
 		t.Fatal("must not emit project-scoped .claude/agents")
 	}
 	if rels[".claude/skills/search-policy/SKILL.md"] {
@@ -123,11 +131,14 @@ func TestClaudeCodeAllowedProjects(t *testing.T) {
 	}
 	overlayDir := adapter.PrivateToken + "/" + claude.HomeDirRel
 	args := strings.Join(out.Plans.Launch.Args, " ")
-	if !strings.Contains(args, "--agent club-faq") ||
+	if !strings.Contains(args, "--agent example-agent") ||
 		!strings.Contains(args, "--settings "+overlayDir+"/settings.json") ||
 		!strings.Contains(args, "--setting-sources user") ||
 		!strings.Contains(args, "--add-dir "+adapter.WorkspaceToken) ||
-		!strings.Contains(args, "--disallowedTools WebFetch,WebSearch") {
+		!strings.Contains(args, "--allowedTools") ||
+		!strings.Contains(args, "WebFetch") ||
+		!strings.Contains(args, "WebSearch") ||
+		strings.Contains(args, "--disallowedTools") {
 		t.Fatalf("launch args %v", out.Plans.Launch.Args)
 	}
 	if out.Plans.Launch.WorkingDirClass != adapter.DestWorkingDir {
@@ -143,8 +154,11 @@ func TestClaudeCodeAllowedProjects(t *testing.T) {
 	if !strings.Contains(body, `"autoAllowBashIfSandboxed": false`) {
 		t.Fatalf("sandboxed Bash must not auto-skip ask:\n%s", body)
 	}
-	if !strings.Contains(body, `"WebFetch"`) || !strings.Contains(body, `"Bash"`) {
-		t.Fatalf("permission rules missing:\n%s", body)
+	if !strings.Contains(body, `"Bash"`) {
+		t.Fatalf("permission rules missing Bash:\n%s", body)
+	}
+	if strings.Contains(body, `"WebFetch"`) || strings.Contains(body, `"WebSearch"`) {
+		t.Fatalf("network allow must not deny WebFetch/WebSearch in settings:\n%s", body)
 	}
 	if !strings.Contains(body, `"Read"`) || !strings.Contains(body, `"Write"`) {
 		t.Fatalf("baseline FS allow missing:\n%s", body)
@@ -153,14 +167,14 @@ func TestClaudeCodeAllowedProjects(t *testing.T) {
 		t.Fatalf("workspace host-config deny is obsolete:\n%s", body)
 	}
 	card := fileBody(out.Plans.Projection.Files, agentCardRel)
-	if !strings.Contains(card, "tools:") || strings.Contains(card, "WebFetch") {
-		t.Fatalf("agent tools:\n%s", card)
+	if !strings.Contains(card, "tools:") || !strings.Contains(card, "WebFetch") {
+		t.Fatalf("network allow must list WebFetch on the agent card:\n%s", card)
 	}
 	if out.Report.Security.Sandbox.Enforcement != "host_enforced" ||
 		out.Report.Security.Permissions.Enforcement != "host_enforced" {
 		t.Fatalf("security %+v / %+v", out.Report.Security.Sandbox, out.Report.Security.Permissions)
 	}
-	assertCard(t, out.Plans.Projection.Files, agentCardRel, "club-faq", run.Description)
+	assertCard(t, out.Plans.Projection.Files, agentCardRel, "example-agent", run.Description)
 	assertSkillFrontmatter(t, out.Plans.Projection.Files, claude.SkillsDirRel+"/search-policy/SKILL.md", "search-policy", "d")
 }
 
@@ -180,7 +194,7 @@ func TestClaudeAuthProfileIsNotPerRunConfigDir(t *testing.T) {
 	if d.Profile.NativeAuthNamespace == "" || d.Profile.Provider == "" {
 		t.Fatalf("profile must name provider and native namespace: %+v", d.Profile)
 	}
-	out, err := adapter.RunPipeline(reg, adapter.HostClaudeCode, sampleRun(true, false), adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
+	out, err := adapter.RunPipeline(reg, adapter.HostClaudeCode, withNetworkAllow(sampleRun(true, false)), adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,11 +211,13 @@ func TestClaudeCodeFilesystemEmptyScopesDeny(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
 	run := sampleRun(true, false)
 	empty := []string{}
+	allow := "allow"
 	run.Permissions = &decode.Permissions{
 		Filesystem: &decode.FilesystemPermissions{
 			Read:  &empty,
 			Write: &empty,
 		},
+		Network: &decode.NetworkPermissions{Default: &allow},
 	}
 	out, err := adapter.RunPipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
 	if err != nil {
@@ -245,7 +261,7 @@ func TestClaudeCodeFilesystemEmptyScopesDeny(t *testing.T) {
 			t.Fatalf("workspace host-config deny is obsolete; deny=%v", set.Permissions.Deny)
 		}
 	}
-	card := fileBody(out.Plans.Projection.Files, claude.AgentsDirRel+"/club-faq.md")
+	card := fileBody(out.Plans.Projection.Files, claude.AgentsDirRel+"/example-agent.md")
 	if strings.Contains(card, "Read") || strings.Contains(card, "Write") {
 		t.Fatalf("agent card must omit FS tools:\n%s", card)
 	}
@@ -268,23 +284,19 @@ func TestKiroSandboxRequiredRefuses(t *testing.T) {
 	}
 }
 
-func TestKiroAllowedBaselinePermissions(t *testing.T) {
+func TestKiroDefaultNetworkDenyUnverified(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
 	out, err := adapter.RunPipeline(reg, adapter.HostKiro, sampleRun(false, false), adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if out.Report.Decision == "refused" {
-		t.Fatalf("kiro baseline should be allowed after permission synthesis, got %s perms=%+v appr=%+v",
-			out.Report.Decision, out.Report.Security.Permissions, out.Report.Security.Approvals)
+		t.Fatalf("kiro default network deny is unproven, must not refuse, got %s perms=%+v",
+			out.Report.Decision, out.Report.Security.Permissions)
 	}
-	if out.Report.Security.Permissions.Support != "approximate" ||
-		out.Report.Security.Permissions.Enforcement != "host_enforced" ||
-		out.Report.Security.Permissions.RequirementResult != "satisfied" {
+	if out.Report.Security.Permissions.ReasonCode != "insufficient_evidence" ||
+		out.Report.Security.Permissions.RequirementResult != "degraded" {
 		t.Fatalf("permissions %+v", out.Report.Security.Permissions)
-	}
-	if out.Plans == nil {
-		t.Fatal("expected plans")
 	}
 }
 
@@ -312,7 +324,7 @@ func TestKiroRefusesNonWorkingDirectoryScope(t *testing.T) {
 // TestKiroProjectionDictionary checks agent JSON shape via Project on an allowed report.
 func TestKiroProjectionDictionary(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	a, err := reg.Select(adapter.HostKiro)
 	if err != nil {
 		t.Fatal(err)
@@ -342,7 +354,7 @@ func TestKiroProjectionDictionary(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	agentRel := kiro.AgentsDirRel + "/club-faq.json"
+	agentRel := kiro.AgentsDirRel + "/example-agent.json"
 	rels := map[string]bool{}
 	for _, f := range np.Files {
 		rels[f.RelPath] = true
@@ -350,11 +362,11 @@ func TestKiroProjectionDictionary(t *testing.T) {
 	if !rels[agentRel] || !rels[kiro.SkillsDirRel+"/search-policy/SKILL.md"] || !rels[kiro.SettingsRel] {
 		t.Fatalf("files %v", rels)
 	}
-	if rels[".kiro/agents/club-faq.json"] {
+	if rels[".kiro/agents/example-agent.json"] {
 		t.Fatal("must not emit project .kiro/agents; card lives under kiro-home/agents")
 	}
 	args := strings.Join(lp.Args, " ")
-	if strings.Contains(args, "--v3") || !strings.Contains(args, "--agent club-faq") {
+	if strings.Contains(args, "--v3") || !strings.Contains(args, "--agent example-agent") {
 		t.Fatalf("launch args want V2 --agent only, got %v", lp.Args)
 	}
 	if lp.Env[kiro.EnvHome] != adapter.WorkspaceToken+"/"+kiro.HomeDirRel {
@@ -367,15 +379,18 @@ func TestKiroProjectionDictionary(t *testing.T) {
 	if strings.Contains(body, `"includePowers"`) || strings.Contains(body, `"permissions"`) {
 		t.Fatalf("agent must omit includePowers/permissions (2.20.1 drops agent):\n%s", body)
 	}
-	if !strings.Contains(body, `"toolsSettings"`) || !strings.Contains(body, `"deniedCommands"`) {
-		t.Fatalf("agent toolsSettings missing:\n%s", body)
+	if !strings.Contains(body, `"toolsSettings"`) || !strings.Contains(body, `"web"`) {
+		t.Fatalf("network allow must project web tool and toolsSettings:\n%s", body)
+	}
+	if strings.Contains(body, `"deniedCommands"`) {
+		t.Fatalf("network allow must not project curl/wget deny list:\n%s", body)
 	}
 	sopURI := "file://" + adapter.WorkspaceToken + "/" + kiro.SOPRel
 	if !strings.Contains(body, sopURI) {
 		t.Fatalf("agent prompt must be file:// SOP:\n%s", body)
 	}
 	sopBody := fileBody(np.Files, kiro.SOPRel)
-	if !strings.Contains(sopBody, `Named Agent "club-faq"`) {
+	if !strings.Contains(sopBody, `Named Agent "example-agent"`) {
 		t.Fatalf("sop identity banner missing:\n%s", sopBody)
 	}
 }
@@ -402,7 +417,7 @@ func TestKiroHooksCamelCaseValidShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	body := fileBody(np.Files, kiro.AgentsDirRel+"/club-faq.json")
+	body := fileBody(np.Files, kiro.AgentsDirRel+"/example-agent.json")
 	for _, bad := range []string{`"AgentSpawn"`, `"PreToolUse"`, `"PostToolUse"`, `"Stop"`} {
 		if strings.Contains(body, bad) {
 			t.Fatalf("PascalCase hook key %s invalidates Kiro 2.20.1 agent:\n%s", bad, body)
@@ -411,6 +426,28 @@ func TestKiroHooksCamelCaseValidShape(t *testing.T) {
 	for _, good := range []string{`"agentSpawn"`, `"preToolUse"`, `"postToolUse"`, `"stop"`} {
 		if !strings.Contains(body, good) {
 			t.Fatalf("missing V2 hook key %s:\n%s", good, body)
+		}
+	}
+}
+
+func TestNetworkAllowIsNotRefused(t *testing.T) {
+	allow := "allow"
+	run := sampleRun(false, false)
+	run.Permissions = &decode.Permissions{
+		Network: &decode.NetworkPermissions{Default: &allow},
+	}
+	reg := committed.New(foundLook(), stubVersion)
+	for _, host := range []string{adapter.HostClaudeCode, adapter.HostCodex, adapter.HostKiro} {
+		out, err := adapter.RunPipeline(reg, host, run, adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
+		if err != nil {
+			t.Fatalf("%s: %v", host, err)
+		}
+		if out.Report.Decision == "refused" {
+			t.Fatalf("%s refused network allow: perms=%+v appr=%+v",
+				host, out.Report.Security.Permissions, out.Report.Security.Approvals)
+		}
+		if out.Report.Security.Permissions.ReasonCode == "permission_overgrant" {
+			t.Fatalf("%s treated network allow as overgrant: %+v", host, out.Report.Security.Permissions)
 		}
 	}
 }
@@ -437,7 +474,7 @@ func TestCodexAllowedBaseline(t *testing.T) {
 	}
 }
 
-func TestCodexRefusesAlwaysApproval(t *testing.T) {
+func TestCodexAlwaysApprovalDoesNotRefuse(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
 	run := sampleRun(false, false)
 	always := "always"
@@ -446,11 +483,11 @@ func TestCodexRefusesAlwaysApproval(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if out.Report.Decision != "refused" {
-		t.Fatalf("codex must refuse always (on-request is weaker), got %s appr=%+v",
+	if out.Report.Decision == "refused" {
+		t.Fatalf("authorized shell must stay usable on Codex, got %s appr=%+v",
 			out.Report.Decision, out.Report.Security.Approvals)
 	}
-	if out.Report.Security.Approvals.ReasonCode != "approval_weaker" {
+	if out.Report.Security.Approvals.ReasonCode == "approval_weaker" {
 		t.Fatalf("approvals %+v", out.Report.Security.Approvals)
 	}
 }
@@ -529,7 +566,7 @@ func TestCodexProjectionDictionary(t *testing.T) {
 
 func TestCodexConfigUsesPermissionProfile(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	run := registerClubFAQRun(t)
+	run := registerOfficialRun(t, "dev-studio", "code-reviewer")
 	out, err := adapter.RunPipeline(reg, adapter.HostCodex, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
@@ -558,7 +595,7 @@ func TestCodexConfigUsesPermissionProfile(t *testing.T) {
 	for _, want := range []string{
 		`default_permissions = "a2h"`,
 		`[permissions.a2h]`,
-		`":workspace_roots" = "write"`,
+		`":workspace_roots" = "read"`,
 		"enabled = false",
 	} {
 		if !strings.Contains(body, want) {
@@ -571,9 +608,9 @@ func TestCodexConfigUsesPermissionProfile(t *testing.T) {
 	}
 }
 
-func TestCodexClubFAQIdentityAndAppsDisabled(t *testing.T) {
+func TestCodexOfficialIdentityAndAppsDisabled(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	run := registerClubFAQRun(t)
+	run := registerOfficialRun(t, "dev-studio", "code-reviewer")
 	out, err := adapter.RunPipeline(reg, adapter.HostCodex, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
@@ -597,21 +634,21 @@ func TestCodexClubFAQIdentityAndAppsDisabled(t *testing.T) {
 	for _, want := range []string{
 		"features.apps = false",
 		"developer_instructions = ",
-		"club-faq",
+		"code-reviewer",
 		"Do not identify as the default Host assistant",
 	} {
 		if !strings.Contains(body, want) && !strings.Contains(string(agents), want) {
 			t.Fatalf("missing %q in codex private config/agents:\nconfig=%s\nagents=%s", want, body, agents)
 		}
 	}
-	if !strings.Contains(body, "[mcp_servers.club-database]") {
-		t.Fatalf("missing club-database MCP:\n%s", body)
+	if !strings.Contains(body, "[mcp_servers.repo-tools]") {
+		t.Fatalf("missing repo-tools MCP:\n%s", body)
 	}
 }
 
-func TestKiroClubFAQNamedAgentPrompt(t *testing.T) {
+func TestKiroOfficialNamedAgentPrompt(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	run := registerClubFAQRun(t)
+	run := registerOfficialRun(t, "research-lab", "web-researcher")
 	out, err := adapter.RunPipeline(reg, adapter.HostKiro, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
@@ -621,7 +658,7 @@ func TestKiroClubFAQNamedAgentPrompt(t *testing.T) {
 	}
 	body := fileBody(out.Plans.Projection.Files, kiro.SOPRel)
 	for _, want := range []string{
-		"club-faq",
+		"web-researcher",
 		"Do not identify as the default Host assistant",
 		"Use them when the user asks for file or shell operations",
 	} {
@@ -631,9 +668,9 @@ func TestKiroClubFAQNamedAgentPrompt(t *testing.T) {
 	}
 }
 
-func registerClubFAQRun(t *testing.T) *space.ResolvedAgentRun {
+func registerOfficialRun(t *testing.T, system, agent string) *space.ResolvedAgentRun {
 	t.Helper()
-	root, err := fixtures.Root()
+	src, err := fixtures.OfficialSystem(system)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -641,10 +678,10 @@ func registerClubFAQRun(t *testing.T) *space.ResolvedAgentRun {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := sp.Register(filepath.Join(root, "trees", "valid", "club-system")); err != nil {
+	if _, err := sp.Register(src); err != nil {
 		t.Fatal(err)
 	}
-	run, err := sp.Resolve("club-system", "club-faq", "")
+	run, err := sp.Resolve(system, agent, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -667,7 +704,7 @@ func TestMissingBinaryRefuses(t *testing.T) {
 
 func TestProjectOmitsOptionalSkill(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	run := sampleRun(false, true)
+	run := withNetworkAllow(sampleRun(false, true))
 	// Force pretty skill unsupported via a one-off assess? Easier: mark pretty
 	// required false and temporarily use a host... default profile maps skills.
 	// Omit by evaluating a fixture-like path: Project filters disposition.
@@ -710,8 +747,8 @@ func TestFingerprintStableAndExcludesClock(t *testing.T) {
 }
 
 func TestBindWorkspaceLocalOnlyPackedFiles(t *testing.T) {
-	packed := []string{"mcp/club-database.py", "hooks/before-tool.py"}
-	if got := adapter.BindWorkspaceLocal("mcp/club-database.py", packed); got != adapter.WorkspaceToken+"/mcp/club-database.py" {
+	packed := []string{"mcp/example-mcp.py", "hooks/before-tool.py"}
+	if got := adapter.BindWorkspaceLocal("mcp/example-mcp.py", packed); got != adapter.WorkspaceToken+"/mcp/example-mcp.py" {
 		t.Fatalf("got %q", got)
 	}
 	if got := adapter.BindWorkspaceLocal("./hooks/before-tool.py", packed); got != adapter.WorkspaceToken+"/hooks/before-tool.py" {
@@ -725,11 +762,11 @@ func TestBindWorkspaceLocalOnlyPackedFiles(t *testing.T) {
 	}
 }
 
-func TestClaudePermissionsApproximateWhenNetworkDenyIncomplete(t *testing.T) {
+func TestClaudeDefaultNetworkDenyUnverified(t *testing.T) {
 	reg := committed.New(foundLook(), stubVersion)
-	// Omitted permissions.network → deny (SRC-SEC-NET). Claude can only project
-	// WebFetch/WebSearch + curl/wget/nc-shaped Bash, so SRC-SEC-INTENT forbids
-	// claiming complete isolation.
+	// Omitted permissions.network → deny. Claude cannot prove every network
+	// exit is closed, so check must start as unverified, not pretend pass
+	// and not refuse the run.
 	out, err := adapter.RunPipeline(reg, adapter.HostClaudeCode, sampleRun(false, false), adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
 	if err != nil {
 		t.Fatal(err)
@@ -738,20 +775,18 @@ func TestClaudePermissionsApproximateWhenNetworkDenyIncomplete(t *testing.T) {
 	if perm.Support != "approximate" {
 		t.Fatalf("permissions support %q, want approximate (incomplete network deny)", perm.Support)
 	}
-	if perm.RequirementResult != "satisfied" || perm.Enforcement != "host_enforced" {
-		t.Fatalf("honesty downgrade must not change the outcome: %+v", perm)
-	}
-	if out.Report.Decision == "refused" {
-		t.Fatalf("decision %s", out.Report.Decision)
+	if out.Report.Decision == "refused" || perm.RequirementResult != "degraded" ||
+		perm.ReasonCode != "insufficient_evidence" {
+		t.Fatalf("unproven deny must be unverified, got decision=%s perms=%+v", out.Report.Decision, perm)
 	}
 }
 
 func TestSystemLocalCommandMarkedExecutable(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	run.MCPServers = map[string]space.ResolvedMCP{
-		"club-database": {
-			Command: "mcp/club-database.py",
-			Files:   []string{"mcp/club-database.py"},
+		"example-mcp": {
+			Command: "mcp/example-mcp.py",
+			Files:   []string{"mcp/example-mcp.py"},
 		},
 		"other": {
 			Command: "python3",
@@ -765,7 +800,7 @@ func TestSystemLocalCommandMarkedExecutable(t *testing.T) {
 			Files:   &[]string{"hooks/before-tool.py"},
 		}},
 	}
-	run.Content["mcp/club-database.py"] = []byte("#!/usr/bin/env python3\n")
+	run.Content["mcp/example-mcp.py"] = []byte("#!/usr/bin/env python3\n")
 	run.Content["mcp/helper.py"] = []byte("#!/usr/bin/env python3\n")
 	run.Content["hooks/before-tool.py"] = []byte("#!/usr/bin/env python3\n")
 
@@ -778,7 +813,7 @@ func TestSystemLocalCommandMarkedExecutable(t *testing.T) {
 		t.Fatal("expected plans")
 	}
 	want := map[string]bool{
-		"mcp/club-database.py": true,
+		"mcp/example-mcp.py":   true,
 		"hooks/before-tool.py": true,
 		"mcp/helper.py":        false,
 		claude.SettingsRel:     false,
@@ -801,12 +836,12 @@ func TestSystemLocalCommandMarkedExecutable(t *testing.T) {
 
 func TestClaudeCodeProjectsMCPAllowlistAndQuotedHooks(t *testing.T) {
 	req := true
-	run := sampleRun(true, false)
+	run := withNetworkAllow(sampleRun(true, false))
 	run.MCPServers = map[string]space.ResolvedMCP{
-		"club-database": {
+		"example-mcp": {
 			Command: "python3",
-			Args:    []string{"mcp/club-database.py"},
-			Files:   []string{"mcp/club-database.py"},
+			Args:    []string{"mcp/example-mcp.py"},
+			Files:   []string{"mcp/example-mcp.py"},
 			Tools: []space.ResolvedTool{{
 				Name: "search_policy", Required: &req,
 			}},
@@ -828,23 +863,23 @@ func TestClaudeCodeProjectsMCPAllowlistAndQuotedHooks(t *testing.T) {
 		t.Fatalf("decision %s", out.Report.Decision)
 	}
 	mcp := fileBody(out.Plans.Projection.Files, claude.MCPRel)
-	if !strings.Contains(mcp, adapter.WorkspaceToken+"/mcp/club-database.py") {
+	if !strings.Contains(mcp, adapter.WorkspaceToken+"/mcp/example-mcp.py") {
 		t.Fatalf("MCP args must bind workspace, got %s", mcp)
 	}
 	if strings.Contains(mcp, `"args": [
-    "mcp/club-database.py"
+    "mcp/example-mcp.py"
   ]`) {
 		t.Fatal("unbound relative MCP arg leaked into plan")
 	}
 	args := strings.Join(out.Plans.Launch.Args, " ")
-	if !strings.Contains(args, "mcp__club-database__search_policy") {
+	if !strings.Contains(args, "mcp__example-mcp__search_policy") {
 		t.Fatalf("allowedTools missing declared MCP tool: %v", out.Plans.Launch.Args)
 	}
 	if strings.Contains(args, "forbidden_echo") {
 		t.Fatal("non-allowlisted MCP tool leaked into launch args")
 	}
-	card := fileBody(out.Plans.Projection.Files, claude.AgentsDirRel+"/club-faq.md")
-	if !strings.Contains(card, "mcp__club-database__search_policy") || strings.Contains(card, "forbidden_echo") {
+	card := fileBody(out.Plans.Projection.Files, claude.AgentsDirRel+"/example-agent.md")
+	if !strings.Contains(card, "mcp__example-mcp__search_policy") || strings.Contains(card, "forbidden_echo") {
 		t.Fatalf("agent card tools:\n%s", card)
 	}
 	settings := fileBody(out.Plans.Projection.Files, claude.SettingsRel)
@@ -859,13 +894,13 @@ func TestClaudeCodeProjectsMCPAllowlistAndQuotedHooks(t *testing.T) {
 
 func TestHookSecretsAreConsumerScopedOnClaude(t *testing.T) {
 	req := true
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	run.Hooks = &decode.Hooks{
 		BeforeToolCall: &[]decode.HookEntry{{
 			Command: "true",
 			Environment: &[]decode.EnvironmentBinding{{
 				Required:  &req,
-				ValueFrom: decode.ValueFrom{Environment: "AUDIT_TOKEN"},
+				ValueFrom: decode.ValueFrom{Environment: "A2H_TEST_HOOK_TOKEN"},
 			}},
 		}},
 	}
@@ -879,7 +914,7 @@ func TestHookSecretsAreConsumerScopedOnClaude(t *testing.T) {
 	}
 	found := false
 	for _, s := range out.Report.Security.SecretIsolation.Items {
-		if s.Consumer == "/hooks/before_tool_call/0" && s.Target == "AUDIT_TOKEN" &&
+		if s.Consumer == "/hooks/before_tool_call/0" && s.Target == "A2H_TEST_HOOK_TOKEN" &&
 			s.Scope == "agent" && s.RequirementResult == "satisfied" {
 			found = true
 		}
@@ -887,22 +922,22 @@ func TestHookSecretsAreConsumerScopedOnClaude(t *testing.T) {
 	if !found {
 		t.Fatalf("missing scoped hook secret row: %+v", out.Report.Security.SecretIsolation)
 	}
-	if out.Plans == nil || !strings.Contains(fileBody(out.Plans.Projection.Files, claude.SettingsRel), "AUDIT_TOKEN") {
+	if out.Plans == nil || !strings.Contains(fileBody(out.Plans.Projection.Files, claude.SettingsRel), "A2H_TEST_HOOK_TOKEN") {
 		t.Fatal("settings must carry hook secret placeholder")
 	}
 }
 
 func TestRequiredMCPSecretIsConsumerScopedOnClaude(t *testing.T) {
 	req := true
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	run.MCPServers = map[string]space.ResolvedMCP{
-		"club-database": {
+		"example-mcp": {
 			Command: "python3",
-			Args:    []string{"mcp/club-database.py"},
-			Files:   []string{"mcp/club-database.py"},
+			Args:    []string{"mcp/example-mcp.py"},
+			Files:   []string{"mcp/example-mcp.py"},
 			Environment: []decode.EnvironmentBinding{{
 				Required:  &req,
-				ValueFrom: decode.ValueFrom{Environment: "CLUB_DB_TOKEN"},
+				ValueFrom: decode.ValueFrom{Environment: "A2H_TEST_TOKEN"},
 			}},
 		},
 	}
@@ -916,7 +951,7 @@ func TestRequiredMCPSecretIsConsumerScopedOnClaude(t *testing.T) {
 	}
 	found := false
 	for _, s := range out.Report.Security.SecretIsolation.Items {
-		if s.Consumer == "/mcp_servers/club-database" && s.Target == "CLUB_DB_TOKEN" &&
+		if s.Consumer == "/mcp_servers/example-mcp" && s.Target == "A2H_TEST_TOKEN" &&
 			s.Scope == "agent" && s.RequirementResult == "satisfied" {
 			found = true
 		}
@@ -924,10 +959,10 @@ func TestRequiredMCPSecretIsConsumerScopedOnClaude(t *testing.T) {
 	if !found {
 		t.Fatalf("missing scoped MCP secret row: %+v", out.Report.Security.SecretIsolation)
 	}
-	if out.Plans == nil || !strings.Contains(fileBody(out.Plans.Projection.Files, claude.MCPRel), adapter.SecretPlaceholder("CLUB_DB_TOKEN")) {
+	if out.Plans == nil || !strings.Contains(fileBody(out.Plans.Projection.Files, claude.MCPRel), adapter.SecretPlaceholder("A2H_TEST_TOKEN")) {
 		t.Fatal("mcp.json must carry secret placeholder")
 	}
-	if !strings.Contains(fileBody(out.Plans.Projection.Files, claude.MCPRel), adapter.WorkspaceToken+"/mcp/club-database.py") {
+	if !strings.Contains(fileBody(out.Plans.Projection.Files, claude.MCPRel), adapter.WorkspaceToken+"/mcp/example-mcp.py") {
 		t.Fatal("mcp.json must bind local script to workspace")
 	}
 }

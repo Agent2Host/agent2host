@@ -337,6 +337,15 @@ func fixtureTree(t *testing.T, bucket, name string) string {
 	return filepath.Join(root, "trees", bucket, name)
 }
 
+func officialSystem(t *testing.T, name string) string {
+	t.Helper()
+	src, err := fixtures.OfficialSystem(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return src
+}
+
 func copyTree(t *testing.T, src string) string {
 	t.Helper()
 	dst := t.TempDir()

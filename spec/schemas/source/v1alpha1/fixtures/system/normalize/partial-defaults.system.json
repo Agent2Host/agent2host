@@ -1,10 +1,10 @@
 {
   "schema_version": "agent2host/v1alpha1",
   "kind": "AgentSystem",
-  "id": "club-system",
+  "id": "example-system",
   "version": "1.0.0",
   "agents": [
-    "./agents/club-faq.agent.json"
+    "./agents/example-agent.agent.json"
   ],
   "defaults": {
     "context_access": "explicit"

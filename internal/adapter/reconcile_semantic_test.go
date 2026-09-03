@@ -12,7 +12,7 @@ import (
 )
 
 func TestReconcilePlansClaudeSemanticOK(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	reg := committed.New(foundLook(), stubVersion)
 	ev, err := adapter.EvaluatePipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
@@ -31,7 +31,7 @@ func TestReconcilePlansClaudeSemanticOK(t *testing.T) {
 }
 
 func TestReconcileSemanticForbiddenBypass(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	reg := committed.New(foundLook(), stubVersion)
 	ev, err := adapter.EvaluatePipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
@@ -49,7 +49,7 @@ func TestReconcileSemanticForbiddenBypass(t *testing.T) {
 }
 
 func TestReconcileSemanticClaudeSettingsNotLoaded(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	reg := committed.New(foundLook(), stubVersion)
 	ev, err := adapter.EvaluatePipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
@@ -75,7 +75,7 @@ func TestReconcileSemanticClaudeSettingsNotLoaded(t *testing.T) {
 }
 
 func TestReconcileSemanticClaudeWeakenedPermissions(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	reg := committed.New(foundLook(), stubVersion)
 	ev, err := adapter.EvaluatePipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
@@ -103,7 +103,7 @@ func TestReconcileSemanticClaudeWeakenedPermissions(t *testing.T) {
 }
 
 func TestVerifyLaunchPlanCodexPrivateAddDir(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	lp := adapter.LaunchPlan{
 		Args: []string{
 			"--ask-for-approval", codex.ApprovalFlag(run),

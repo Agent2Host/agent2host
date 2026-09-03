@@ -1,0 +1,121 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "code-reviewer",
+  "name": "Code reviewer",
+  "description": "Pre-merge review with loop SOP and repo MCP.",
+  "sop": "./sops/code-reviewer.sop.md",
+  "skills": [
+    "code-review",
+    {
+      "id": "api-design-check",
+      "required": false
+    }
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/eng-handbook.md",
+      "loading": "on_demand",
+      "isolation": "required"
+    },
+    {
+      "path": "./contexts/style-guide.md",
+      "loading": "on_demand"
+    }
+  ],
+  "mcp_servers": {
+    "repo-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/repo-tools.py"
+      ],
+      "files": [
+        "./mcp/repo-tools.py"
+      ],
+      "tools": [
+        "list_changed_files",
+        "get_diff_summary",
+        "read_file_hunk"
+      ],
+      "environment": [
+        {
+          "value_from": {
+            "environment": "A2H_TEST_TOKEN"
+          },
+          "required": true
+        }
+      ]
+    }
+  },
+  "hooks": {
+    "session_start": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/session-start.py"
+        ],
+        "files": [
+          "./hooks/session-start.py"
+        ]
+      }
+    ],
+    "before_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/before-tool.py"
+        ],
+        "files": [
+          "./hooks/before-tool.py"
+        ],
+        "environment": [
+          {
+            "value_from": {
+              "environment": "A2H_TEST_HOOK_TOKEN"
+            },
+            "required": true
+          }
+        ]
+      }
+    ],
+    "after_tool_call": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/after-tool.py"
+        ],
+        "files": [
+          "./hooks/after-tool.py"
+        ],
+        "required": false
+      }
+    ],
+    "agent_stop": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/agent-stop.py"
+        ],
+        "files": [
+          "./hooks/agent-stop.py"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

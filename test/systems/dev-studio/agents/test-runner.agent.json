@@ -1,0 +1,83 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "test-runner",
+  "name": "Test runner",
+  "description": "CI and local test planning with loop SOP.",
+  "sop": "./sops/test-runner.sop.md",
+  "skills": [
+    "test-triage",
+    "debugging"
+  ],
+  "mcp_servers": {
+    "ci-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/ci-tools.py"
+      ],
+      "files": [
+        "./mcp/ci-tools.py"
+      ],
+      "tools": [
+        "pipeline_status",
+        "get_lint_summary",
+        "plan_test_matrix"
+      ]
+    },
+    "repo-tools": {
+      "transport": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "./mcp/repo-tools.py"
+      ],
+      "files": [
+        "./mcp/repo-tools.py"
+      ],
+      "tools": [
+        "list_changed_files",
+        "get_diff_summary"
+      ]
+    }
+  },
+  "hooks": {
+    "session_start": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/session-start.py"
+        ],
+        "files": [
+          "./hooks/session-start.py"
+        ]
+      }
+    ],
+    "agent_stop": [
+      {
+        "command": "python3",
+        "args": [
+          "./hooks/agent-stop.py"
+        ],
+        "files": [
+          "./hooks/agent-stop.py"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  },
+  "approvals": {
+    "shell_execute": "on_boundary"
+  }
+}

@@ -2,7 +2,6 @@ package adapter_test
 
 import (
 	"errors"
-	"path/filepath"
 	"testing"
 
 	"github.com/agent2host/agent2host/internal/adapter"
@@ -11,10 +10,9 @@ import (
 	"github.com/agent2host/agent2host/internal/space"
 )
 
-// registerClubFAQ registers the published club-system fixture and resolves club-faq.
-func registerClubFAQ(t *testing.T) *space.ResolvedAgentRun {
+func registerOfficial(t *testing.T, system, agent string) *space.ResolvedAgentRun {
 	t.Helper()
-	root, err := fixtures.Root()
+	src, err := fixtures.OfficialSystem(system)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,37 +20,96 @@ func registerClubFAQ(t *testing.T) *space.ResolvedAgentRun {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := sp.Register(filepath.Join(root, "trees", "valid", "club-system")); err != nil {
+	if _, err := sp.Register(src); err != nil {
 		t.Fatal(err)
 	}
-	run, err := sp.Resolve("club-system", "club-faq", "")
+	run, err := sp.Resolve(system, agent, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	return run
 }
 
-func TestClubFAQCheckAllowedAllCommittedHosts(t *testing.T) {
-	run := registerClubFAQ(t)
-	reg := committed.New(foundLook(), stubVersion)
-	for _, host := range []string{adapter.HostClaudeCode, adapter.HostKiro, adapter.HostCodex} {
-		out, err := adapter.RunPipeline(reg, host, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
+func TestOfficialSystemsRegister(t *testing.T) {
+	for _, system := range []string{"dev-studio", "ops-desk", "research-lab"} {
+		src, err := fixtures.OfficialSystem(system)
 		if err != nil {
-			t.Fatalf("%s pipeline: %v", host, err)
+			t.Fatal(err)
 		}
-		if out.Report.Decision == "refused" {
-			t.Fatalf("%s refused club-faq: activation=%+v perms=%+v appr=%+v mcp_iso=%+v",
-				host, out.Report.Activation, out.Report.Security.Permissions,
-				out.Report.Security.Approvals, out.Report.Security.MCPToolIsolation)
+		sp, err := space.Open(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
 		}
-		if out.Plans == nil {
-			t.Fatalf("%s: expected plans", host)
+		rep, err := sp.Register(src)
+		if err != nil {
+			t.Fatalf("%s register: %v", system, err)
+		}
+		if rep.SystemID != system {
+			t.Fatalf("%s id %q", system, rep.SystemID)
 		}
 	}
 }
 
+func TestCodeReviewerDefaultNetworkDeny(t *testing.T) {
+	run := registerOfficial(t, "dev-studio", "code-reviewer")
+	reg := committed.New(foundLook(), stubVersion)
+	want := map[string]string{
+		adapter.HostClaudeCode: "allowed_with_warnings",
+		adapter.HostKiro:       "allowed_with_warnings",
+		adapter.HostCodex:      "allowed_with_warnings",
+	}
+	for host, decision := range want {
+		out, err := adapter.RunPipeline(reg, host, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
+		if err != nil {
+			t.Fatalf("%s: %v", host, err)
+		}
+		if out.Report.Decision != decision {
+			t.Fatalf("%s code-reviewer decision %s, want %s perms=%+v appr=%+v",
+				host, out.Report.Decision, decision, out.Report.Security.Permissions, out.Report.Security.Approvals)
+		}
+	}
+}
+
+func TestWebResearcherNetworkAllow(t *testing.T) {
+	run := registerOfficial(t, "research-lab", "web-researcher")
+	reg := committed.New(foundLook(), stubVersion)
+	for _, host := range []string{adapter.HostClaudeCode, adapter.HostKiro} {
+		out, err := adapter.RunPipeline(reg, host, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
+		if err != nil {
+			t.Fatalf("%s: %v", host, err)
+		}
+		if out.Report.Decision == "refused" {
+			t.Fatalf("%s web-researcher refused: perms=%+v appr=%+v",
+				host, out.Report.Security.Permissions, out.Report.Security.Approvals)
+		}
+		if out.Report.Security.Permissions.ReasonCode == "permission_overgrant" {
+			t.Fatalf("%s treated network allow as overgrant: %+v", host, out.Report.Security.Permissions)
+		}
+	}
+}
+
+func TestDeployGuardSandbox(t *testing.T) {
+	run := registerOfficial(t, "ops-desk", "deploy-guard")
+	reg := committed.New(foundLook(), stubVersion)
+	out, err := adapter.RunPipeline(reg, adapter.HostKiro, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Report.Decision != "refused" {
+		t.Fatalf("kiro deploy-guard must refuse, got %s sbx=%+v", out.Report.Decision, out.Report.Security.Sandbox)
+	}
+	out, err = adapter.RunPipeline(reg, adapter.HostCodex, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Report.Decision == "refused" && out.Report.Security.Approvals.ReasonCode == "approval_weaker" {
+		t.Fatalf("codex must not refuse for asking less on authorized shell: appr=%+v",
+			out.Report.Security.Approvals)
+	}
+}
+
 func TestProjectRejectsTamperedAssessIntent(t *testing.T) {
-	run := sampleRun(false, false)
+	run := withNetworkAllow(sampleRun(false, false))
 	reg := committed.New(foundLook(), stubVersion)
 	ev, err := adapter.EvaluatePipeline(reg, adapter.HostClaudeCode, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
 	if err != nil {
@@ -71,7 +128,7 @@ func TestProjectRejectsTamperedAssessIntent(t *testing.T) {
 }
 
 func TestMCPIsolationHostEnforcedWhenPlanned(t *testing.T) {
-	run := registerClubFAQ(t)
+	run := registerOfficial(t, "dev-studio", "code-reviewer")
 	reg := committed.New(foundLook(), stubVersion)
 	for _, host := range []string{adapter.HostClaudeCode, adapter.HostKiro, adapter.HostCodex} {
 		ev, err := adapter.EvaluatePipeline(reg, host, run, adapter.ProjectionContext{}, "test", adapter.RunPolicy{})
@@ -79,7 +136,7 @@ func TestMCPIsolationHostEnforcedWhenPlanned(t *testing.T) {
 			t.Fatal(err)
 		}
 		if !ev.Intent.Has(adapter.ControlMCP) {
-			t.Fatalf("%s: club-faq must plan MCP controls", host)
+			t.Fatalf("%s: code-reviewer must plan MCP controls", host)
 		}
 		if len(ev.Report.Security.MCPToolIsolation.Items) == 0 {
 			t.Fatalf("%s: expected mcp_tool_isolation items", host)

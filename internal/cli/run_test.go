@@ -14,7 +14,7 @@ import (
 )
 
 func TestCLIRunJSONLaunchesStub(t *testing.T) {
-	home, stub := registerTree(t, "markdown-leading-dashes")
+	home, stub := registerOfficialRun(t, "research-lab")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "1.0.0-test", nil },
@@ -22,7 +22,7 @@ func TestCLIRunJSONLaunchesStub(t *testing.T) {
 	defer restore()
 
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "--accept-warnings", "run", "fm/demo", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "--accept-warnings", "run", "research-lab/web-researcher", "--host", "claude-code"}, &out, &errb)
 	if code != 0 {
 		t.Fatalf("run %d: %s\n%s", code, errb.String(), out.String())
 	}
@@ -62,7 +62,7 @@ func TestCLIRunJSONLaunchesStub(t *testing.T) {
 }
 
 func TestCLIRunDefaultUsesHumanSessionMessages(t *testing.T) {
-	home, stub := registerTree(t, "markdown-leading-dashes")
+	home, stub := registerOfficialRun(t, "research-lab")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "1.0.0-test", nil },
@@ -70,11 +70,11 @@ func TestCLIRunDefaultUsesHumanSessionMessages(t *testing.T) {
 	defer restore()
 
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "run", "fm/demo", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "run", "research-lab/web-researcher", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitOK {
 		t.Fatalf("run %d: stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
-	for _, want := range []string{"Starting demo in Claude Code…", "host-ok", "Session ended."} {
+	for _, want := range []string{"Starting web-researcher in Claude Code…", "host-ok", "Session ended."} {
 		if !strings.Contains(out.String(), want) {
 			t.Fatalf("stdout missing %q: %q", want, out.String())
 		}
@@ -98,7 +98,7 @@ func TestCLIRunRejectsJSONAndVerboseTogether(t *testing.T) {
 }
 
 func TestCLIRunUnexpectedHostExitUsesHumanMessage(t *testing.T) {
-	home, _ := registerTree(t, "markdown-leading-dashes")
+	home, _ := registerOfficialRun(t, "research-lab")
 	failingHost := filepath.Join(t.TempDir(), "host-fails")
 	if err := os.WriteFile(failingHost, []byte("#!/bin/sh\nexit 2\n"), 0o755); err != nil {
 		t.Fatal(err)
@@ -110,7 +110,7 @@ func TestCLIRunUnexpectedHostExitUsesHumanMessage(t *testing.T) {
 	defer restore()
 
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "run", "fm/demo", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "run", "research-lab/web-researcher", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitHostProcess {
 		t.Fatalf("exit code = %d, want %d; stdout=%q stderr=%q", code, cli.ExitHostProcess, out.String(), errb.String())
 	}
@@ -123,16 +123,16 @@ func TestCLIRunUnexpectedHostExitUsesHumanMessage(t *testing.T) {
 }
 
 func TestCLIRunClubFAQScopedSecrets(t *testing.T) {
-	home, stub := registerTree(t, "club-system")
+	home, stub := registerOfficialRun(t, "dev-studio")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "1.0.0-test", nil },
 	))
 	defer restore()
-	t.Setenv("CLUB_DB_TOKEN", "token-value-must-not-be-recorded")
-	t.Setenv("AUDIT_TOKEN", "audit-value-must-not-be-recorded")
+	t.Setenv("A2H_TEST_TOKEN", "token-value-must-not-be-recorded")
+	t.Setenv("A2H_TEST_HOOK_TOKEN", "audit-value-must-not-be-recorded")
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "--accept-warnings", "run", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "--accept-warnings", "run", "dev-studio/code-reviewer", "--host", "codex"}, &out, &errb)
 	if code != 0 {
 		t.Fatalf("scoped MCP/hook secrets must run, got %d:\n%s\n%s", code, errb.String(), out.String())
 	}
@@ -175,7 +175,7 @@ func TestCLIRunNativeArgsRejected(t *testing.T) {
 }
 
 func TestCLIRunVerboseShowsDetailsAfterUnexpectedExit(t *testing.T) {
-	home, _ := registerTree(t, "markdown-leading-dashes")
+	home, _ := registerOfficialRun(t, "research-lab")
 	failingHost := filepath.Join(t.TempDir(), "host-fails")
 	if err := os.WriteFile(failingHost, []byte("#!/bin/sh\nexit 2\n"), 0o755); err != nil {
 		t.Fatal(err)
@@ -187,7 +187,7 @@ func TestCLIRunVerboseShowsDetailsAfterUnexpectedExit(t *testing.T) {
 	defer restore()
 
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--verbose", "run", "fm/demo", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--verbose", "run", "research-lab/web-researcher", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitHostProcess {
 		t.Fatalf("exit code = %d, want %d; stdout=%q stderr=%q", code, cli.ExitHostProcess, out.String(), errb.String())
 	}
@@ -202,14 +202,14 @@ func TestCLIRunVerboseShowsDetailsAfterUnexpectedExit(t *testing.T) {
 }
 
 func TestCLIRunUnverifiedHostVersionHumanMessage(t *testing.T) {
-	home, stub := registerTree(t, "club-system")
+	home, stub := registerOfficialRun(t, "dev-studio")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "9.9.9-unverified", nil },
 	))
 	defer restore()
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "run", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "run", "dev-studio/code-reviewer", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitRefused {
 		t.Fatalf("unverified host version must refuse run, got %d stdout=%s stderr=%s", code, out.String(), errb.String())
 	}
@@ -223,14 +223,14 @@ func TestCLIRunUnverifiedHostVersionHumanMessage(t *testing.T) {
 }
 
 func TestCLIRunUnverifiedHostVersionRefuses(t *testing.T) {
-	home, stub := registerTree(t, "club-system")
+	home, stub := registerOfficialRun(t, "dev-studio")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "9.9.9-unverified", nil },
 	))
 	defer restore()
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "--accept-warnings", "run", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "--accept-warnings", "run", "dev-studio/code-reviewer", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitRefused {
 		t.Fatalf("unverified host version must refuse run, got %d stdout=%s stderr=%s", code, out.String(), errb.String())
 	}
@@ -238,14 +238,14 @@ func TestCLIRunUnverifiedHostVersionRefuses(t *testing.T) {
 }
 
 func TestCLIRunRefusedNoLaunch(t *testing.T) {
-	home, _ := registerTree(t, "club-system")
+	home, _ := registerOfficialRun(t, "dev-studio")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return "", os.ErrNotExist },
 		func(string) (string, error) { return "", os.ErrNotExist },
 	))
 	defer restore()
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "run", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "run", "dev-studio/code-reviewer", "--host", "claude-code"}, &out, &errb)
 	if code != cli.ExitRefused {
 		t.Fatalf("code %d %s", code, out.String())
 	}
@@ -259,14 +259,14 @@ func TestCLIRunRefusedNoLaunch(t *testing.T) {
 }
 
 func TestCLIRunWarningsNotAcceptedLeavesNoRunDir(t *testing.T) {
-	home, stub := registerTree(t, "club-system")
+	home, stub := registerOfficialRun(t, "dev-studio")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "1.0.0-test", nil },
 	))
 	defer restore()
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "run", "club-system/club-faq", "--host", "codex"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "run", "dev-studio/code-reviewer", "--host", "codex"}, &out, &errb)
 	if code == 0 {
 		t.Fatalf("expected a refused or unaccepted warning run, got success: %s", out.String())
 	}
@@ -274,14 +274,14 @@ func TestCLIRunWarningsNotAcceptedLeavesNoRunDir(t *testing.T) {
 }
 
 func TestCLICheckLeavesNoRunDir(t *testing.T) {
-	home, stub := registerTree(t, "club-system")
+	home, stub := registerOfficialRun(t, "dev-studio")
 	restore := cli.SetCheckHostsForTest(committed.New(
 		func(string) (string, error) { return stub, nil },
 		func(string) (string, error) { return "1.0.0-test", nil },
 	))
 	defer restore()
 	var out, errb bytes.Buffer
-	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "club-system/club-faq", "--host", "claude-code"}, &out, &errb)
+	code := cli.Main([]string{"a2h", "--home", home, "--json", "check", "dev-studio/code-reviewer", "--host", "claude-code"}, &out, &errb)
 	if code != 0 && code != cli.ExitRefused {
 		t.Fatalf("check %d: %s %s", code, out.String(), errb.String())
 	}
@@ -303,13 +303,12 @@ func assertNoRunDirs(t *testing.T, home string) {
 	}
 }
 
-func registerTree(t *testing.T, tree string) (home, stub string) {
+func registerOfficialRun(t *testing.T, system string) (home, stub string) {
 	t.Helper()
-	root, err := fixtures.Root()
+	src, err := fixtures.OfficialSystem(system)
 	if err != nil {
 		t.Fatal(err)
 	}
-	src := filepath.Join(root, "trees", "valid", tree)
 	home = t.TempDir()
 	var out, errb bytes.Buffer
 	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {

@@ -13,12 +13,12 @@ import (
 	"github.com/agent2host/agent2host/internal/source/fixtures"
 )
 
-func TestClubDatabaseMCPStubHandshake(t *testing.T) {
-	root, err := fixtures.Root()
+func TestOfficialWebSearchMCPStubHandshake(t *testing.T) {
+	src, err := fixtures.OfficialSystem("research-lab")
 	if err != nil {
 		t.Fatal(err)
 	}
-	script := filepath.Join(root, "trees", "valid", "club-system", "mcp", "club-database.py")
+	script := filepath.Join(src, "mcp", "web-search.py")
 
 	initReq := map[string]any{
 		"jsonrpc": "2.0", "id": 1, "method": "initialize",
@@ -32,56 +32,46 @@ func TestClubDatabaseMCPStubHandshake(t *testing.T) {
 	callReq := map[string]any{
 		"jsonrpc": "2.0", "id": 3, "method": "tools/call",
 		"params": map[string]any{
-			"name": "search_policy", "arguments": map[string]any{"query": "guest"},
+			"name": "search_web", "arguments": map[string]any{"query": "agent2host"},
 		},
 	}
 
-	initResp, err := mcpRoundTrip(t, script, initReq)
+	initResp, err := mcpRoundTripNDJSON(t, script, initReq)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(initResp), "club-database") {
+	if !strings.Contains(string(initResp), "web-search") {
 		t.Fatalf("initialize: %s", initResp)
 	}
 
-	listResp, err := mcpRoundTrip(t, script, initReq, map[string]any{"jsonrpc": "2.0", "method": "notifications/initialized", "params": map[string]any{}}, listReq)
+	listResp, err := mcpRoundTripNDJSON(t, script, initReq, map[string]any{"jsonrpc": "2.0", "method": "notifications/initialized", "params": map[string]any{}}, listReq)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var listDoc struct {
-		Result struct {
-			Tools []struct {
-				Name string `json:"name"`
-			} `json:"tools"`
-		} `json:"result"`
-	}
-	if err := json.Unmarshal(listResp, &listDoc); err != nil {
-		t.Fatalf("tools/list parse: %v body=%s", err, listResp)
-	}
-	names := map[string]bool{}
-	for _, tool := range listDoc.Result.Tools {
-		names[tool.Name] = true
-	}
-	if !names["search_policy"] || !names["get_member"] || names["forbidden_echo"] {
-		t.Fatalf("tools/list names: %v", names)
+	if !strings.Contains(string(listResp), "search_web") || !strings.Contains(string(listResp), "fetch_snippet") {
+		t.Fatalf("tools/list: %s", listResp)
 	}
 
-	callResp, err := mcpRoundTrip(t, script, initReq, map[string]any{"jsonrpc": "2.0", "method": "notifications/initialized", "params": map[string]any{}}, callReq)
+	callResp, err := mcpRoundTripNDJSON(t, script, initReq, map[string]any{"jsonrpc": "2.0", "method": "notifications/initialized", "params": map[string]any{}}, callReq)
 	if err != nil {
 		t.Fatal(err)
 	}
 	body := string(callResp)
-	if !strings.Contains(body, "POLICY_CANARY_OK") || !strings.Contains(body, "members only after 18:00") {
+	if !strings.Contains(body, "WEB_SEARCH_OK") {
 		t.Fatalf("tools/call: %s", body)
 	}
-
-	// Hosts may speak NDJSON instead of Content-Length; both must work.
-	ndjsonOut, err := mcpRoundTripNDJSON(t, script, initReq, listReq)
+	fetchReq := map[string]any{
+		"jsonrpc": "2.0", "id": 4, "method": "tools/call",
+		"params": map[string]any{
+			"name": "fetch_snippet", "arguments": map[string]any{"page_id": "p1"},
+		},
+	}
+	fetchResp, err := mcpRoundTripNDJSON(t, script, initReq, fetchReq)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(ndjsonOut), "search_policy") {
-		t.Fatalf("ndjson tools/list: %s", ndjsonOut)
+	if !strings.Contains(string(fetchResp), "example.invalid") {
+		t.Fatalf("fetch_snippet must stay on example.invalid: %s", fetchResp)
 	}
 }
 

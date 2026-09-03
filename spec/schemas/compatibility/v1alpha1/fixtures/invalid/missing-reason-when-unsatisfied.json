@@ -2,8 +2,8 @@
   "schema_version": "agent2host/compatibility-report/v1alpha1",
   "agent2host_version": "0.0.0-dev",
   "subject": {
-    "system_id": "club-system",
-    "agent_id": "club-faq",
+    "system_id": "example-system",
+    "agent_id": "example-agent",
     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   },
   "host": {
@@ -67,7 +67,7 @@
     "context": {
       "items": [
         {
-          "path": "contexts/club-handbook.md",
+          "path": "contexts/example-handbook.md",
           "required": true,
           "loading": "on_demand",
           "isolation": "required",
@@ -91,7 +91,7 @@
     "mcp": {
       "items": [
         {
-          "server_id": "club-database",
+          "server_id": "example-mcp",
           "name": "search_policy",
           "required": true,
           "support": "native",
@@ -166,7 +166,7 @@
     "context_isolation": {
       "items": [
         {
-          "path": "contexts/club-handbook.md",
+          "path": "contexts/example-handbook.md",
           "required": true,
           "support": "mapped",
           "scope": "agent",
@@ -179,7 +179,7 @@
     "mcp_tool_isolation": {
       "items": [
         {
-          "server_id": "club-database",
+          "server_id": "example-mcp",
           "support": "mapped",
           "scope": "agent",
           "enforcement": "host_enforced",
@@ -198,10 +198,10 @@
     "secret_isolation": {
       "items": [
         {
-          "consumer": "/mcp_servers/club-database",
-          "target": "CLUB_DB_TOKEN",
+          "consumer": "/mcp_servers/example-mcp",
+          "target": "A2H_TEST_TOKEN",
           "consumer_kind": "mcp_server",
-          "server_id": "club-database",
+          "server_id": "example-mcp",
           "required": true,
           "support": "mapped",
           "scope": "agent",

@@ -57,7 +57,7 @@ func TestBindingOfAndWarningSet(t *testing.T) {
 
 func TestOfficialReuseMatch(t *testing.T) {
 	b := Binding{
-		SystemID: "club-system", AgentID: "club-faq", Revision: "sha256:1",
+		SystemID: "example-system", AgentID: "example-agent", Revision: "sha256:1",
 		Fingerprint: "sha256:2", AdapterVersion: "0.1.0", Agent2HostVersion: "0.0.0-dev",
 	}
 	if !OfficialReuse(b, b) {

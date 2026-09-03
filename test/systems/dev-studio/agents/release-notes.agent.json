@@ -1,0 +1,32 @@
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "release-notes",
+  "name": "Release notes",
+  "description": "Structured changelog and release highlights.",
+  "sop": "./sops/release-notes.sop.md",
+  "skills": [
+    "changelog-draft"
+  ],
+  "contexts": [
+    {
+      "path": "./contexts/eng-handbook.md",
+      "loading": "on_demand"
+    }
+  ],
+  "output": {
+    "schema": "./schemas/release-notes.schema.json",
+    "enforcement": "best_effort"
+  },
+  "permissions": {
+    "filesystem": {
+      "read": [
+        "working_directory"
+      ],
+      "write": []
+    },
+    "network": {
+      "default": "deny"
+    }
+  }
+}

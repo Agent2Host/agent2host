@@ -13,7 +13,7 @@ import (
 func boolPtr(b bool) *bool { return &b }
 
 func skillSys() *decode.SystemSource {
-	tools := []decode.MCPToolRef{{ServerID: "club-database", ToolName: "search_policy"}}
+	tools := []decode.MCPToolRef{{ServerID: "example-mcp", ToolName: "search_policy"}}
 	return &decode.SystemSource{
 		Skills: &map[string]decode.SkillEntry{
 			"search-policy": {
@@ -39,10 +39,10 @@ func TestPhaseB(t *testing.T) {
 		if rule.ID(err) != "SRC-MCP-SKILL-REF" {
 			t.Fatalf("got %v", err)
 		}
-		if strings.Contains(err.Error(), "club-database/search_policy") {
+		if strings.Contains(err.Error(), "example-mcp/search_policy") {
 			t.Fatalf("must not join identity with /: %v", err)
 		}
-		if !strings.Contains(err.Error(), `server_id="club-database"`) || !strings.Contains(err.Error(), `tool_name="search_policy"`) {
+		if !strings.Contains(err.Error(), `server_id="example-mcp"`) || !strings.Contains(err.Error(), `tool_name="search_policy"`) {
 			t.Fatalf("detail %v", err)
 		}
 	})
@@ -53,7 +53,7 @@ func TestPhaseB(t *testing.T) {
 			SOP:    "./sops/demo.sop.md",
 			Skills: &[]decode.SkillRef{{ID: "search-policy"}},
 			MCPServers: &map[string]decode.MCPServer{
-				"club-database": {Transport: "stdio", Command: "python", Tools: []decode.ToolAllowlistEntry{}},
+				"example-mcp": {Transport: "stdio", Command: "python", Tools: []decode.ToolAllowlistEntry{}},
 			},
 		}
 		normalize.Agent(a)
@@ -69,7 +69,7 @@ func TestPhaseB(t *testing.T) {
 			SOP:    "./sops/demo.sop.md",
 			Skills: &[]decode.SkillRef{{ID: "search-policy"}},
 			MCPServers: &map[string]decode.MCPServer{
-				"club-database": {
+				"example-mcp": {
 					Transport: "stdio",
 					Command:   "python",
 					Tools:     []decode.ToolAllowlistEntry{{Name: "other_tool"}},
@@ -89,7 +89,7 @@ func TestPhaseB(t *testing.T) {
 			SOP:    "./sops/demo.sop.md",
 			Skills: &[]decode.SkillRef{{ID: "search-policy"}},
 			MCPServers: &map[string]decode.MCPServer{
-				"club-database": {
+				"example-mcp": {
 					Transport: "stdio",
 					Command:   "python",
 					Tools:     []decode.ToolAllowlistEntry{{Name: "search_policy"}},
@@ -108,7 +108,7 @@ func TestPhaseB(t *testing.T) {
 			SOP:    "./sops/demo.sop.md",
 			Skills: &[]decode.SkillRef{{ID: "search-policy"}},
 			MCPServers: &map[string]decode.MCPServer{
-				"club-database": {
+				"example-mcp": {
 					Transport: "stdio",
 					Command:   "python",
 					Tools:     []decode.ToolAllowlistEntry{{Name: "search_policy"}},
@@ -127,7 +127,7 @@ func TestPhaseB(t *testing.T) {
 			SOP:    "./sops/demo.sop.md",
 			Skills: &[]decode.SkillRef{{ID: "search-policy", Required: boolPtr(true)}},
 			MCPServers: &map[string]decode.MCPServer{
-				"club-database": {
+				"example-mcp": {
 					Transport: "stdio",
 					Command:   "python",
 					Tools:     []decode.ToolAllowlistEntry{{Name: "search_policy"}},
@@ -198,8 +198,8 @@ func TestSkillCollectionDuplicatePaths(t *testing.T) {
 
 func TestSkillDuplicateMCPToolRef(t *testing.T) {
 	tools := []decode.MCPToolRef{
-		{ServerID: "club-database", ToolName: "search_policy"},
-		{ServerID: "club-database", ToolName: "search_policy"},
+		{ServerID: "example-mcp", ToolName: "search_policy"},
+		{ServerID: "example-mcp", ToolName: "search_policy"},
 	}
 	sys := &decode.SystemSource{
 		Skills: &map[string]decode.SkillEntry{
@@ -220,7 +220,7 @@ func TestEmptyToolsAllowlistWarns(t *testing.T) {
 		ID:  "demo",
 		SOP: "./sops/demo.sop.md",
 		MCPServers: &map[string]decode.MCPServer{
-			"club-database": {Transport: "stdio", Command: "python", Tools: []decode.ToolAllowlistEntry{}},
+			"example-mcp": {Transport: "stdio", Command: "python", Tools: []decode.ToolAllowlistEntry{}},
 		},
 	}
 	normalize.Agent(a)
