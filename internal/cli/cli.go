@@ -297,31 +297,25 @@ func open(home string) (*space.Space, error) {
 	return space.Open(home)
 }
 
-func resolveAndPrintWorkRoot(run *space.ResolvedAgentRun, project string, createFixed bool, stderr io.Writer) (string, error) {
+func resolveAndPrintWorkRoot(run *space.ResolvedAgentRun, project string, stderr io.Writer) (runtime.WorkRootResolution, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return "", err
+		return runtime.WorkRootResolution{}, err
 	}
 	userHome, err := os.UserHomeDir()
 	if err != nil {
-		return "", err
+		return runtime.WorkRootResolution{}, err
 	}
 	res, err := runtime.ResolveRunWorkRoot(run, project, cwd, userHome)
 	if err != nil {
-		return "", err
+		return runtime.WorkRootResolution{}, err
 	}
-	if createFixed && res.Mode == decode.WorkRootFixed && !res.Exists {
-		fmt.Fprintf(stderr, "This Agent System will use or create:\n%s\n", res.Path)
-		res, err = runtime.EnsureWorkRoot(res)
-		if err != nil {
-			return "", err
-		}
-	} else if res.Mode == decode.WorkRootFixed && !res.Exists {
+	if res.Mode == decode.WorkRootFixed && !res.Exists {
 		fmt.Fprintf(stderr, "This Agent System will use or create:\n%s\n", res.Path)
 	} else {
 		fmt.Fprintf(stderr, "Work root (%s): %s\n", res.Mode, res.Path)
 	}
-	return res.Path, nil
+	return res, nil
 }
 
 func exitWorkRoot(err error) int {
@@ -465,7 +459,7 @@ func cmdCheck(home, target, host, project string, requireStrictRead, jsonOut boo
 		return exitSpaceOrRegistry(err)
 	}
 	policy := adapter.RunPolicy{RequireStrictRead: requireStrictRead}
-	if _, err := resolveAndPrintWorkRoot(run, project, false, stderr); err != nil {
+	if _, err := resolveAndPrintWorkRoot(run, project, stderr); err != nil {
 		fmt.Fprintln(stderr, err)
 		return exitWorkRoot(err)
 	}
@@ -530,12 +524,12 @@ func cmdRun(home, target string, nativeArgs []string, host, project string, requ
 	for _, id := range recovered.Quarantined {
 		fmt.Fprintf(stderr, "A previous run could not be cleaned safely and was set aside (%s). Use a2h clean --quarantine to delete it.\n", id)
 	}
-	wd, err := resolveAndPrintWorkRoot(run, project, true, stderr)
+	root, err := resolveAndPrintWorkRoot(run, project, stderr)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return exitWorkRoot(err)
 	}
-	pctx, reserved, err := runtime.PrepareContext(home, wd, runtime.ContextRun)
+	pctx, reserved, err := runtime.PrepareContext(home, root.Path, runtime.ContextRun)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return ExitPrecondition
@@ -560,6 +554,11 @@ func cmdRun(home, target string, nativeArgs []string, host, project string, requ
 			renderRunAuthorizationFailure(stdout, stderr, report, err, verbose)
 		}
 		return exitAuthorize(err)
+	}
+	root, err = runtime.EnsureWorkRoot(root)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return exitWorkRoot(err)
 	}
 	prep, err := runtime.BeginRun(reserved)
 	if err != nil {

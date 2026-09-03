@@ -689,3 +689,109 @@ func TestCLICheckFixedRejectsProject(t *testing.T) {
 		t.Fatalf("stderr %q", errb.String())
 	}
 }
+
+func TestCLICheckFixedDoesNotCreate(t *testing.T) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := "A2HWorkRootCheckNoCreate"
+	abs := filepath.Join(homeDir, rel)
+	if err := os.RemoveAll(abs); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(abs) })
+
+	src := writeMiniSystem(t, `{"mode":"fixed","path_from_home":"`+rel+`"}`)
+	home := t.TempDir()
+	var out, errb bytes.Buffer
+	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
+		t.Fatalf("register %s", errb.String())
+	}
+	restore := cli.SetCheckHostsForTest(committed.New(
+		func(file string) (string, error) { return "/opt/" + file, nil },
+		func(string) (string, error) { return "1.0.0-test", nil },
+	))
+	defer restore()
+	out.Reset()
+	errb.Reset()
+	if cli.Main([]string{"a2h", "--home", home, "check", "mini-sys/demo", "--host", "claude-code"}, &out, &errb) != 0 {
+		t.Fatalf("check %s", errb.String())
+	}
+	if _, err := os.Stat(abs); err == nil {
+		t.Fatal("check must not create a missing fixed work root")
+	}
+}
+
+func TestCLIRunFixedDoesNotCreateWhenRefused(t *testing.T) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := "A2HWorkRootRunNoCreate"
+	abs := filepath.Join(homeDir, rel)
+	if err := os.RemoveAll(abs); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(abs) })
+
+	src := writeMiniSystem(t, `{"mode":"fixed","path_from_home":"`+rel+`"}`)
+	home := t.TempDir()
+	var out, errb bytes.Buffer
+	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
+		t.Fatalf("register %s", errb.String())
+	}
+	restore := cli.SetCheckHostsForTest(committed.New(
+		func(file string) (string, error) { return "/opt/" + file, nil },
+		func(string) (string, error) { return "1.0.0-test", nil },
+	))
+	defer restore()
+	out.Reset()
+	errb.Reset()
+	code := cli.Main([]string{"a2h", "--home", home, "run", "mini-sys/demo", "--host", "not-a-host"}, &out, &errb)
+	if code == 0 {
+		t.Fatal("unknown host must not run")
+	}
+	if _, err := os.Stat(abs); err == nil {
+		t.Fatal("run must not create a fixed work root when start is refused")
+	}
+}
+
+func TestCLIRunFixedCreatesAfterAuthorize(t *testing.T) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := "A2HWorkRootRunCreate"
+	abs := filepath.Join(homeDir, rel)
+	if err := os.RemoveAll(abs); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(abs) })
+
+	src := writeMiniSystem(t, `{"mode":"fixed","path_from_home":"`+rel+`"}`)
+	home := t.TempDir()
+	var out, errb bytes.Buffer
+	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
+		t.Fatalf("register %s", errb.String())
+	}
+	stub := filepath.Join(t.TempDir(), "host")
+	if err := os.WriteFile(stub, []byte("#!/bin/sh\nexit 0\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	restore := cli.SetCheckHostsForTest(committed.New(
+		func(string) (string, error) { return stub, nil },
+		func(string) (string, error) { return "1.0.0-test", nil },
+	))
+	defer restore()
+	out.Reset()
+	errb.Reset()
+	code := cli.Main([]string{"a2h", "--home", home, "--accept-warnings", "run", "mini-sys/demo", "--host", "claude-code"}, &out, &errb)
+	if code != 0 {
+		t.Fatalf("run %d: %s", code, errb.String())
+	}
+	st, err := os.Stat(abs)
+	if err != nil || !st.IsDir() {
+		t.Fatalf("authorized run must create the fixed work root: %v", err)
+	}
+}
