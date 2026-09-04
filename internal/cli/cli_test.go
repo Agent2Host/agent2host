@@ -834,3 +834,74 @@ func TestCLIRunFixedCreatesAfterAuthorize(t *testing.T) {
 		t.Fatalf("authorized run must create the fixed work root: %v", err)
 	}
 }
+
+func TestCLIRegisterMissingWorkRootHint(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "agents"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "sops"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	sys := `{
+  "schema_version": "agent2host/v1alpha2",
+  "kind": "AgentSystem",
+  "id": "mini-sys",
+  "version": "0.1.0",
+  "agents": ["./agents/demo.agent.json"]
+}`
+	if err := os.WriteFile(filepath.Join(dir, "system.json"), []byte(sys), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "agents", "demo.agent.json"), []byte(`{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "sop": "./sops/demo.sop.md"
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "sops", "demo.sop.md"), []byte("# demo\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	code := cli.Main([]string{"a2h", "--home", t.TempDir(), "register", dir}, &out, &errb)
+	if code == 0 {
+		t.Fatal("missing work_root must fail")
+	}
+	got := errb.String()
+	if !strings.Contains(got, "work_root") || !strings.Contains(got, "v1alpha2") {
+		t.Fatalf("stderr %q", got)
+	}
+}
+
+func TestCLIBadTargetHint(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := cli.Main([]string{"a2h", "--home", t.TempDir(), "check", "dev-studio", "--host", "claude-code"}, &out, &errb)
+	if code == 0 {
+		t.Fatal("bare system id must fail")
+	}
+	got := errb.String()
+	if !strings.Contains(got, "bad_target") || !strings.Contains(got, "system-id/agent-id") {
+		t.Fatalf("stderr %q", got)
+	}
+}
+
+func TestCLIUnknownAgentHint(t *testing.T) {
+	src := officialSystem(t, "dev-studio")
+	home := t.TempDir()
+	var out, errb bytes.Buffer
+	if cli.Main([]string{"a2h", "--home", home, "register", src}, &out, &errb) != 0 {
+		t.Fatalf("register %s", errb.String())
+	}
+	out.Reset()
+	errb.Reset()
+	code := cli.Main([]string{"a2h", "--home", home, "inspect", "dev-studio/nope"}, &out, &errb)
+	if code == 0 {
+		t.Fatal("unknown agent must fail")
+	}
+	got := errb.String()
+	if !strings.Contains(got, "unknown_agent") || !strings.Contains(got, "a2h list") {
+		t.Fatalf("stderr %q", got)
+	}
+}

@@ -213,8 +213,12 @@ func secretFacts(run *space.ResolvedAgentRun, probe ProbeResult, intent ControlI
 		scope, enforce, conf := "unknown", "unknown", "documented"
 		if !probe.Found {
 			scope, enforce, conf = "unknown", "unknown", "documented"
-		} else if s, ok := intent.SecretScope(consumer, target); ok {
-			scope, enforce = s, "host_enforced"
+		} else if s, ok := intent.secretBinding(consumer, target); ok {
+			scope = s.Scope
+			enforce = s.Enforcement
+			if enforce == "" {
+				enforce = "host_enforced"
+			}
 		} else if HostProcessConsumer(consumer) {
 			scope, enforce = "agent", "host_enforced"
 		} else {

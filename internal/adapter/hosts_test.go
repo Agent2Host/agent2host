@@ -1020,6 +1020,18 @@ func TestKiroMCPSecretsUseEnvInterpolation(t *testing.T) {
 	if !found {
 		t.Fatalf("Kiro must deliver MCP secrets via process env: %+v", out.Plans.Launch.Secrets)
 	}
+	scoped := false
+	for _, s := range out.Report.Security.SecretIsolation.Items {
+		if s.Consumer == "/mcp_servers/example-mcp" && s.Target == "A2H_TEST_TOKEN" {
+			if s.Scope != "agent" || s.Enforcement != "unknown" || s.RequirementResult != "satisfied" {
+				t.Fatalf("Kiro process-env secret must stay agent-scoped and unverified: %+v", s)
+			}
+			scoped = true
+		}
+	}
+	if !scoped {
+		t.Fatalf("missing Kiro MCP secret row: %+v", out.Report.Security.SecretIsolation)
+	}
 }
 
 func TestProjectRefusedError(t *testing.T) {

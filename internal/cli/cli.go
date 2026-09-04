@@ -425,7 +425,7 @@ func cmdRegister(home, dir string, jsonOut bool, stdout, stderr io.Writer) int {
 	}
 	rep, err := sp.Register(dir)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printRegisterErr(stderr, err)
 		return exitSpaceOrRegistry(err)
 	}
 	for _, w := range rep.Warnings {
@@ -481,7 +481,7 @@ func cmdList(home string, jsonOut bool, stdout, stderr io.Writer) int {
 func cmdInspect(home, target string, jsonOut bool, stdout, stderr io.Writer) int {
 	sys, agent, err := space.ParseTarget(target)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitParseTarget(err)
 	}
 	sp, err := open(home)
@@ -491,7 +491,7 @@ func cmdInspect(home, target string, jsonOut bool, stdout, stderr io.Writer) int
 	}
 	ins, err := sp.Inspect(sys, agent)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitSpaceOrRegistry(err)
 	}
 	if jsonOut {
@@ -516,7 +516,7 @@ func cmdInspect(home, target string, jsonOut bool, stdout, stderr io.Writer) int
 func cmdResolve(home, target string, stdout, stderr io.Writer) int {
 	sys, agent, err := space.ParseTarget(target)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitParseTarget(err)
 	}
 	sp, err := open(home)
@@ -526,7 +526,7 @@ func cmdResolve(home, target string, stdout, stderr io.Writer) int {
 	}
 	run, err := sp.Resolve(sys, agent, "")
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitSpaceOrRegistry(err)
 	}
 	return writeJSON(stdout, stderr, run)
@@ -537,7 +537,7 @@ const executionContract = "agent2host/execution-contract/v1alpha1"
 func cmdCheck(home, target, host, project string, requireStrictRead, jsonOut bool, stdout, stderr io.Writer) int {
 	sys, agent, err := space.ParseTarget(target)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitParseTarget(err)
 	}
 	sp, err := open(home)
@@ -547,7 +547,7 @@ func cmdCheck(home, target, host, project string, requireStrictRead, jsonOut boo
 	}
 	run, err := sp.Resolve(sys, agent, "")
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitSpaceOrRegistry(err)
 	}
 	policy := adapter.RunPolicy{RequireStrictRead: requireStrictRead}
@@ -595,7 +595,7 @@ func cmdRun(home, target string, nativeArgs []string, host, project string, requ
 	}
 	sys, agent, err := space.ParseTarget(target)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitParseTarget(err)
 	}
 	sp, err := open(home)
@@ -605,7 +605,7 @@ func cmdRun(home, target string, nativeArgs []string, host, project string, requ
 	}
 	run, err := sp.Resolve(sys, agent, "")
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		printErr(stderr, err)
 		return exitSpaceOrRegistry(err)
 	}
 	recovered, err := runtime.RecoverLeftovers(home)
@@ -762,6 +762,34 @@ func cmdClean(home string, opts runtime.CleanOpts, jsonOut bool, stdout, stderr 
 func stdinIsTTY() bool {
 	fi, err := os.Stdin.Stat()
 	return err == nil && fi.Mode()&os.ModeCharDevice != 0
+}
+
+func printErr(stderr io.Writer, err error) {
+	if err == nil || stderr == nil {
+		return
+	}
+	fmt.Fprintln(stderr, err)
+	var se *space.Error
+	if !errors.As(err, &se) {
+		return
+	}
+	switch se.Kind {
+	case space.KindBadTarget:
+		fmt.Fprintln(stderr, "The name must be system-id/agent-id. Run a2h list to see registered agents.")
+	case space.KindUnknownAgent:
+		fmt.Fprintln(stderr, "That agent is not in the registered system. Run a2h list to see available agents.")
+	}
+}
+
+func printRegisterErr(stderr io.Writer, err error) {
+	printErr(stderr, err)
+	if err == nil || stderr == nil {
+		return
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "jsonschema") || strings.Contains(msg, "missing property") {
+		fmt.Fprintln(stderr, "New systems need schema_version agent2host/v1alpha2 and a work_root. See docs/guides/write-your-first-system.md")
+	}
 }
 
 func writeJSON(stdout, stderr io.Writer, v any) int {

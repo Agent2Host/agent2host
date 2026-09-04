@@ -228,14 +228,18 @@ func wipeSecrets(p Prepared, plan adapter.NativeProjectionPlan, values map[strin
 			}
 			continue
 		}
-		if err := scrubSecretValuesInFile(dest, values); err != nil {
+		if err := scrubSecretValuesInFile(dest, values, secretFileMode(f)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func scrubSecretValuesInFile(path string, values map[string]string) error {
+// minSecretScrubLen skips short values so wipe does not delete common
+// substrings such as "dev" or "test" from unrelated planned files.
+const minSecretScrubLen = 8
+
+func scrubSecretValuesInFile(path string, values map[string]string, mode os.FileMode) error {
 	if len(values) == 0 {
 		return nil
 	}
@@ -246,9 +250,12 @@ func scrubSecretValuesInFile(path string, values map[string]string) error {
 		}
 		return err
 	}
+	if mode == 0 {
+		mode = filePermOr(path, 0o600)
+	}
 	changed := false
 	for _, val := range values {
-		if val == "" || !bytes.Contains(body, []byte(val)) {
+		if len(val) < minSecretScrubLen || !bytes.Contains(body, []byte(val)) {
 			continue
 		}
 		body = bytes.ReplaceAll(body, []byte(val), nil)
@@ -257,7 +264,15 @@ func scrubSecretValuesInFile(path string, values map[string]string) error {
 	if !changed {
 		return nil
 	}
-	return os.WriteFile(path, body, 0o600)
+	return os.WriteFile(path, body, mode)
+}
+
+func filePermOr(path string, fallback os.FileMode) os.FileMode {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return fallback
+	}
+	return fi.Mode().Perm()
 }
 
 // persistSecretBaselines stores placeholder Plan bytes so a later Prepare can
@@ -310,7 +325,7 @@ func scrubSecretValuesExcept(dir string, values map[string]string, skip map[stri
 		}
 		changed := false
 		for _, val := range values {
-			if val == "" || !bytes.Contains(body, []byte(val)) {
+			if len(val) < minSecretScrubLen || !bytes.Contains(body, []byte(val)) {
 				continue
 			}
 			body = bytes.ReplaceAll(body, []byte(val), nil)
@@ -319,7 +334,7 @@ func scrubSecretValuesExcept(dir string, values map[string]string, skip map[stri
 		if !changed {
 			return nil
 		}
-		return os.WriteFile(path, body, 0o600)
+		return os.WriteFile(path, body, info.Mode().Perm())
 	})
 }
 

@@ -67,9 +67,10 @@ type PlannedControl struct {
 
 // PlannedSecret is consumer-scoped delivery Assess promised.
 type PlannedSecret struct {
-	Consumer string `json:"consumer"`
-	Target   string `json:"target"`
-	Scope    string `json:"scope"`
+	Consumer    string `json:"consumer"`
+	Target      string `json:"target"`
+	Scope       string `json:"scope"`
+	Enforcement string `json:"enforcement,omitempty"`
 }
 
 // ControlIntent is Assess-time effective policy. It is not a Report field.
@@ -95,12 +96,34 @@ func (c ControlIntent) Has(kind string) bool {
 
 // SecretScope returns the planned delivery scope for this binding.
 func (c ControlIntent) SecretScope(consumer, target string) (string, bool) {
+	s, ok := c.secretBinding(consumer, target)
+	if !ok {
+		return "", false
+	}
+	return s.Scope, true
+}
+
+func (c ControlIntent) secretBinding(consumer, target string) (PlannedSecret, bool) {
 	for _, s := range c.Secrets {
 		if s.Consumer == consumer && s.Target == target {
-			return s.Scope, true
+			return s, true
 		}
 	}
-	return "", false
+	return PlannedSecret{}, false
+}
+
+// MarkUnverifiedProcessEnvSecrets records that MCP/hook values delivered on
+// the Host process environment are not proven isolated from that session.
+func MarkUnverifiedProcessEnvSecrets(c *ControlIntent) {
+	if c == nil {
+		return
+	}
+	for i := range c.Secrets {
+		if HostProcessConsumer(c.Secrets[i].Consumer) {
+			continue
+		}
+		c.Secrets[i].Enforcement = "unknown"
+	}
 }
 
 // DigestIntent is the in-process identity of this ControlIntent.

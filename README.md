@@ -111,7 +111,7 @@ The name you run is **`system-id/agent-id` from the JSON**, not the folder name.
 
 An Agent System is one folder. JSON declares structure. Markdown declares behavior. Extra JSON keys are rejected. Do not put passwords, tokens, or `.env` files in this folder.
 
-Minimum that runs:
+New systems use `agent2host/v1alpha2` and must declare `work_root`. Minimum that runs:
 
 ```text
 demo-system/
@@ -122,7 +122,34 @@ demo-system/
     └── demo.sop.md
 ```
 
-Then `a2h register ./demo-system` and run `demo-system/demo`. How to fill `system.json` and the agent file, and how to add skills, contexts, MCP, hooks, and permissions: [`docs/guides/write-your-first-system.md`](docs/guides/write-your-first-system.md) and [`docs/guides/add-capabilities.md`](docs/guides/add-capabilities.md). Those files are in the clone.
+`system.json`:
+
+```json
+{
+  "schema_version": "agent2host/v1alpha2",
+  "kind": "AgentSystem",
+  "id": "demo-system",
+  "name": "Demo System",
+  "version": "0.1.0",
+  "agents": ["./agents/demo.agent.json"],
+  "work_root": { "mode": "invocation" }
+}
+```
+
+`agents/demo.agent.json` (agent files stay on `v1alpha1`):
+
+```json
+{
+  "schema_version": "agent2host/v1alpha1",
+  "kind": "Agent",
+  "id": "demo",
+  "name": "Demo Agent",
+  "description": "A minimal Agent2Host example.",
+  "sop": "./sops/demo.sop.md"
+}
+```
+
+`sops/demo.sop.md` is ordinary Markdown. Then `a2h register ./demo-system` and run `demo-system/demo`. Skills, context, MCP, hooks, and permissions: [`docs/guides/write-your-first-system.md`](docs/guides/write-your-first-system.md) and [`docs/guides/add-capabilities.md`](docs/guides/add-capabilities.md). Those files are in the clone.
 
 ## Work root
 
@@ -131,7 +158,7 @@ The host does **not** work in the folder you registered from. `system.json` choo
 - **`invocation`** — `--project <dir>` if you pass it (that directory must already exist), otherwise the directory you are in. Used by `dev-studio`.
 - **`fixed`** — a folder under the user's home from `path_from_home` (for example `Documents/notes` → `~/Documents/notes`). `run` cannot change it. `--project` is an error. `check` never creates a missing folder. `run` prints the absolute path and creates it only after the host is allowed to start.
 
-A `v1alpha1` system with no `work_root` is treated as `invocation`.
+Older systems still on `v1alpha1` with no `work_root` are treated as `invocation` for compatibility.
 
 ## What `check` and `run` tell you
 
@@ -160,7 +187,7 @@ Registered systems live under `~/.a2h/` unless you set `--home` or `A2H_HOME`. `
 
 ## More detail in this repository
 
-These pages are files in the clone under `docs/`. They are not required to finish install and the first `run` above. A documentation website may be published later; do not treat a website as the only manual.
+These pages are files in the clone under `docs/`. They are not required to finish install and the first `run` above. The same pages are also at https://agent2host.github.io/agent2host/. Use the clone if you are offline; do not treat the website as the only manual.
 
 - [Install (other platforms, checksums, source)](docs/getting-started/install.md)
 - [First run](docs/getting-started/first-run.md)

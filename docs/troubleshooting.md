@@ -34,9 +34,24 @@ codex --version
 
 Run only the command for the host you chose. Complete its own sign-in flow, then return to `a2h check`.
 
+## My `system.json` is rejected
+
+`register` checks the folder against the published format. The first error is often a missing required field.
+
+New systems must use `"schema_version": "agent2host/v1alpha2"` and include `work_root`, for example `"work_root": { "mode": "invocation" }`. Agent files stay on `agent2host/v1alpha1`.
+
+A typical raw error looks like:
+
+```text
+jsonschema validation failed with 'urn:agent2host:schema:source:v1alpha2:system#'
+- at '': missing property 'work_root'
+```
+
+That means `system.json` is missing `work_root`. Extra JSON keys are also rejected. Copy the minimum files in [Create your first Agent System](guides/write-your-first-system.md).
+
 ## `system-id/agent-id` is not found
 
-The run name comes from JSON, not the source folder name. Inspect the registered snapshot:
+The run name comes from JSON, not the source folder name. `check dev-studio --host claude-code` is incomplete; the name is `dev-studio/code-reviewer`. Inspect the registered snapshot:
 
 ```bash
 a2h list

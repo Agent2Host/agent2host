@@ -83,6 +83,7 @@ func kiroIntent(run *space.ResolvedAgentRun, probe adapter.ProbeResult) adapter.
 		})
 		adapter.AppendHookSecrets(&c, run)
 	}
+	adapter.MarkUnverifiedProcessEnvSecrets(&c)
 	return c
 }
 

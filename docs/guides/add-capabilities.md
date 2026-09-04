@@ -283,6 +283,8 @@ export REPO_TOOLS_TOKEN='your-local-value'
 
 The System stores `REPO_TOOLS_TOKEN`, not its value. Put an `environment` array directly on the Agent for a host-session variable, or on a hook for a value used only by that hook.
 
+On Kiro, Agent2Host writes `${REPO_TOOLS_TOKEN}` in the host config and puts the value on the Kiro process environment, as Kiro documents. That keeps the value out of the config file. It does not hide the value from the rest of that session.
+
 ## See the complete Agent file
 
 After the additions above, `agents/implementer.agent.json` can look like this:

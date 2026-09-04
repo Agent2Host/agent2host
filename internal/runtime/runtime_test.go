@@ -795,3 +795,35 @@ func TestOverlayDoesNotWriteSecretsIntoDestProjection(t *testing.T) {
 		t.Fatalf("wipe left secret bytes: %s", after)
 	}
 }
+
+func TestScrubSkipsShortValuesAndKeepsExecutable(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "hook.sh")
+	body := []byte("echo dev secret-xyz leftover\n")
+	if err := os.WriteFile(path, body, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := scrubSecretValuesInFile(path, map[string]string{
+		"SHORT": "dev",
+		"LONG":  "secret-xyz",
+	}, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(got, []byte("dev")) {
+		t.Fatalf("short value must stay: %s", got)
+	}
+	if bytes.Contains(got, []byte("secret-xyz")) {
+		t.Fatalf("long value must be removed: %s", got)
+	}
+	st, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st.Mode().Perm() != 0o700 {
+		t.Fatalf("mode %o", st.Mode().Perm())
+	}
+}
