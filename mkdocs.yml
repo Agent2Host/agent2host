@@ -1,0 +1,84 @@
+site_name: Agent2Host
+site_description: Define an Agent System once, then check and run a named agent in a native host.
+site_url: https://agent2host.github.io/agent2host/
+repo_name: Agent2Host/agent2host
+repo_url: https://github.com/Agent2Host/agent2host
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  font: false
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.footer
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Use dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Use light mode
+
+plugins:
+  - search
+
+copyright: Copyright &copy; 2026 Agent2Host
+
+extra:
+  generator: false
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Start:
+      - Install Agent2Host: getting-started/install.md
+      - Run your first Agent: getting-started/first-run.md
+  - Learn:
+      - Use an existing Agent System: guides/use-an-existing-system.md
+      - Create your first Agent System: guides/write-your-first-system.md
+      - Choose a work root: guides/work-roots.md
+      - Add capabilities: guides/add-capabilities.md
+      - Permissions and safety: guides/permissions-and-safety.md
+      - How Agent2Host works: concepts/lifecycle.md
+      - Native hosts and compatibility: concepts/native-hosts.md
+  - Reference:
+      - CLI reference: reference/cli.md
+      - Agent System reference: reference/source-format.md
+      - Supported hosts and limitations: reference/hosts-and-limits.md
+      - Troubleshooting: troubleshooting.md

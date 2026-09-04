@@ -29,6 +29,9 @@ a2h-home/
 vendor/
 bin/
 
+# MkDocs build output
+site/
+
 # Dependencies / build (language-agnostic placeholders)
 node_modules/
 dist/
