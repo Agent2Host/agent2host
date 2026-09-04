@@ -9,8 +9,8 @@
   --md-primary-fg-color--dark: #f1f5f9;
   --md-primary-bg-color: #111827;
   --md-primary-bg-color--light: #4b5563;
-  --md-accent-fg-color: #2563eb;
-  --md-typeset-a-color: #2563eb;
+  --md-accent-fg-color: #5468ff;
+  --md-typeset-a-color: #5468ff;
 }
 
 [data-md-color-scheme="slate"] {
@@ -19,8 +19,8 @@
   --md-primary-fg-color--dark: #060b14;
   --md-primary-bg-color: #f8fafc;
   --md-primary-bg-color--light: #cbd5e1;
-  --md-accent-fg-color: #60a5fa;
-  --md-typeset-a-color: #60a5fa;
+  --md-accent-fg-color: #7c8aff;
+  --md-typeset-a-color: #7c8aff;
   --md-default-bg-color: #0d1117;
 }
 
@@ -84,7 +84,28 @@
 }
 
 .md-header__button.md-logo {
+  display: flex;
+  align-items: center;
+  margin: 0 0.15rem 0 0;
+  padding: 0.2rem 0.35rem 0.2rem 0;
+}
+
+.md-header__button.md-logo img {
   display: none;
+  width: 6rem;
+  height: auto;
+}
+
+.md-header__button.md-logo .a2h-logo--light {
+  display: block;
+}
+
+[data-md-color-scheme="slate"] .md-header__button.md-logo .a2h-logo--light {
+  display: none;
+}
+
+[data-md-color-scheme="slate"] .md-header__button.md-logo .a2h-logo--dark {
+  display: block;
 }
 
 .md-typeset h1 {

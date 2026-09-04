@@ -7,8 +7,11 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  custom_dir: docs/overrides
   language: en
   font: false
+  logo: assets/brand/a2h-lockup.svg
+  favicon: assets/brand/favicon.ico
   icon:
     repo: fontawesome/brands/github
   features:
