@@ -57,6 +57,30 @@ type SecretRef struct {
 	Name     string `json:"name"`
 	Consumer string `json:"consumer"`
 	Required bool   `json:"required"`
+	// DeliverProcessEnv puts the resolved value on the Host process environment.
+	// Use this when the Host expands ${NAME} in config and must not receive the
+	// value inside a model-readable projection file.
+	DeliverProcessEnv bool `json:"deliver_process_env,omitempty"`
+}
+
+// HostEnvInterpolation is the Host-documented ${NAME} slot. It is not a
+// SecretPlaceholder and Runtime must not overlay it with the raw value.
+func HostEnvInterpolation(name string) string {
+	if name == "" {
+		return ""
+	}
+	return "${" + name + "}"
+}
+
+// SecretOverlayAllowed is true only for Host-private destinations. DestProjection
+// is model-readable and must keep placeholders or ${NAME} slots only.
+func SecretOverlayAllowed(class DestinationClass) bool {
+	switch class {
+	case DestHostPrivate, DestHostAuth, DestAuthProfile:
+		return true
+	default:
+		return false
+	}
 }
 
 // HostProcessConsumer is true when V0 may inject this binding into the Host env.

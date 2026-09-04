@@ -622,6 +622,15 @@ func TestResolveSecretsScopesMCPConsumer(t *testing.T) {
 	}
 }
 
+func TestResolveSecretsDeliverProcessEnv(t *testing.T) {
+	got, err := resolveSecrets([]adapter.SecretRef{{
+		Name: "A2H_TEST_TOKEN", Consumer: "/mcp_servers/example-mcp", Required: true, DeliverProcessEnv: true,
+	}}, func(string) string { return "secret-value" })
+	if err != nil || len(got.env) != 1 || got.env[0] != "A2H_TEST_TOKEN=secret-value" {
+		t.Fatalf("%+v %v", got, err)
+	}
+}
+
 func TestResolveSecretsOmitsMissingOptionalMCP(t *testing.T) {
 	got, err := resolveSecrets([]adapter.SecretRef{{
 		Name: "A2H_TEST_TOKEN", Consumer: "/mcp_servers/example-mcp", Required: false,
@@ -742,5 +751,47 @@ func TestWipeSecretsRestoresPlaceholders(t *testing.T) {
 	}
 	if !bytes.Contains(after, []byte(adapter.SecretPlaceholder("T"))) {
 		t.Fatalf("wipe must restore placeholder: %s", after)
+	}
+}
+
+func TestOverlayDoesNotWriteSecretsIntoDestProjection(t *testing.T) {
+	home := t.TempDir()
+	p, err := Prepare(home, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := "kiro-home/agents/example-agent.json"
+	plan := adapter.NativeProjectionPlan{
+		Files: []adapter.ProjectionFile{{
+			RelPath: rel,
+			Class:   adapter.DestProjection,
+			Content: []byte(`{"env":{"T":"` + adapter.SecretPlaceholder("T") + `"}}` + "\n"),
+		}},
+	}
+	if err := materialize(p, plan); err != nil {
+		t.Fatal(err)
+	}
+	if err := overlaySecrets(p, plan, map[string]string{"T": "secret-xyz"}, nil); err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(p.Workspace, rel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(body, []byte("secret-xyz")) {
+		t.Fatalf("DestProjection must not receive secret bytes: %s", body)
+	}
+	if !bytes.Contains(body, []byte(adapter.SecretPlaceholder("T"))) {
+		t.Fatalf("DestProjection must keep the slot, got %s", body)
+	}
+	if err := wipeSecrets(p, plan, map[string]string{"T": "secret-xyz"}); err != nil {
+		t.Fatal(err)
+	}
+	after, err := os.ReadFile(filepath.Join(p.Workspace, rel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(after, []byte("secret-xyz")) {
+		t.Fatalf("wipe left secret bytes: %s", after)
 	}
 }

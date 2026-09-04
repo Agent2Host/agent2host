@@ -300,7 +300,9 @@ func kiroMCPServers(run *space.ResolvedAgentRun, report compatibility.Report) (m
 		if len(srv.Environment) > 0 {
 			env := map[string]string{}
 			for _, b := range srv.Environment {
-				env[b.ValueFrom.Environment] = adapter.SecretPlaceholder(b.ValueFrom.Environment)
+				// Official Kiro MCP env form: ${NAME} expands from process env.
+				// Do not write SecretPlaceholder here — DestProjection is model-readable.
+				env[b.ValueFrom.Environment] = adapter.HostEnvInterpolation(b.ValueFrom.Environment)
 			}
 			entry["env"] = env
 		}
@@ -338,7 +340,7 @@ func kiroHooks(run *space.ResolvedAgentRun, report compatibility.Report) (map[st
 			if h.Environment != nil {
 				env := map[string]string{}
 				for _, b := range *h.Environment {
-					env[b.ValueFrom.Environment] = adapter.SecretPlaceholder(b.ValueFrom.Environment)
+					env[b.ValueFrom.Environment] = adapter.HostEnvInterpolation(b.ValueFrom.Environment)
 				}
 				if len(env) > 0 {
 					entry["env"] = env

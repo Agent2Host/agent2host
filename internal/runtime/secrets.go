@@ -35,7 +35,7 @@ func resolveSecrets(refs []adapter.SecretRef, getenv func(string) string) (resol
 			continue
 		}
 		out.values[ref.Name] = v
-		if adapter.HostProcessConsumer(ref.Consumer) {
+		if adapter.HostProcessConsumer(ref.Consumer) || ref.DeliverProcessEnv {
 			out.env = append(out.env, ref.Name+"="+v)
 		}
 	}
@@ -51,6 +51,9 @@ func overlaySecrets(p Prepared, plan adapter.NativeProjectionPlan, values map[st
 		omit[n] = true
 	}
 	for _, f := range plan.Files {
+		if !adapter.SecretOverlayAllowed(f.Class) {
+			continue
+		}
 		if !bytes.Contains(f.Content, []byte(adapter.SecretPlaceholderPrefix)) {
 			continue
 		}
@@ -207,14 +210,10 @@ func walkSecretSlots(v any, values map[string]string, omit map[string]bool) erro
 	return nil
 }
 
-// wipeSecrets restores Plan bytes (placeholders) for secret-bearing files, then
-// scrubs any remaining secret values under the isolation config dir so resume
-// never reuses an overlaid value.
+// wipeSecrets restores Plan bytes for secret-bearing files, then removes any
+// remaining secret values from those planned destinations only.
 func wipeSecrets(p Prepared, plan adapter.NativeProjectionPlan, values map[string]string) error {
 	for _, f := range plan.Files {
-		if !bytes.Contains(f.Content, []byte(adapter.SecretPlaceholderPrefix)) {
-			continue
-		}
 		root, err := rootFor(p, f.Class)
 		if err != nil {
 			return err
@@ -223,14 +222,42 @@ func wipeSecrets(p Prepared, plan adapter.NativeProjectionPlan, values map[strin
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(dest, f.Content, secretFileMode(f)); err != nil {
+		if bytes.Contains(f.Content, []byte(adapter.SecretPlaceholderPrefix)) {
+			if err := os.WriteFile(dest, f.Content, secretFileMode(f)); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := scrubSecretValuesInFile(dest, values); err != nil {
 			return err
 		}
 	}
-	if err := scrubSecretValues(filepath.Join(p.Workspace, "kiro-home"), values); err != nil {
+	return nil
+}
+
+func scrubSecretValuesInFile(path string, values map[string]string) error {
+	if len(values) == 0 {
+		return nil
+	}
+	body, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
 		return err
 	}
-	return nil
+	changed := false
+	for _, val := range values {
+		if val == "" || !bytes.Contains(body, []byte(val)) {
+			continue
+		}
+		body = bytes.ReplaceAll(body, []byte(val), nil)
+		changed = true
+	}
+	if !changed {
+		return nil
+	}
+	return os.WriteFile(path, body, 0o600)
 }
 
 // persistSecretBaselines stores placeholder Plan bytes so a later Prepare can

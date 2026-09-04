@@ -72,7 +72,7 @@ func (a *kiroAdapter) Project(run *space.ResolvedAgentRun, probe adapter.ProbeRe
 	})
 	lp := adapter.Launch(probe, "kiro:--agent")
 	files, lp = projectKiro(run, report, files, lp)
-	lp.Secrets = adapter.SecretRefs(run)
+	lp.Secrets = kiroSecretRefs(run)
 	files = adapter.MarkExecutableFiles(files, run)
 	np := adapter.NativeProjectionPlan{HostID: adapter.HostKiro, Files: files}
 	intent := kiroIntent(run, probe)
@@ -80,6 +80,16 @@ func (a *kiroAdapter) Project(run *space.ResolvedAgentRun, probe adapter.ProbeRe
 		return adapter.NativeProjectionPlan{}, adapter.LaunchPlan{}, err
 	}
 	return np, lp, nil
+}
+
+func kiroSecretRefs(run *space.ResolvedAgentRun) []adapter.SecretRef {
+	refs := adapter.SecretRefs(run)
+	for i := range refs {
+		if !adapter.HostProcessConsumer(refs[i].Consumer) {
+			refs[i].DeliverProcessEnv = true
+		}
+	}
+	return refs
 }
 
 func kiroProFile() adapter.Profile {

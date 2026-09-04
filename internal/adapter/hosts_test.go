@@ -976,6 +976,52 @@ func TestReconcileIntentMissingFile(t *testing.T) {
 	}
 }
 
+func TestKiroMCPSecretsUseEnvInterpolation(t *testing.T) {
+	req := true
+	run := withNetworkAllow(sampleRun(false, false))
+	run.MCPServers = map[string]space.ResolvedMCP{
+		"example-mcp": {
+			Command: "python3",
+			Args:    []string{"mcp/example-mcp.py"},
+			Files:   []string{"mcp/example-mcp.py"},
+			Environment: []decode.EnvironmentBinding{{
+				Required:  &req,
+				ValueFrom: decode.ValueFrom{Environment: "A2H_TEST_TOKEN"},
+			}},
+		},
+	}
+	reg := committed.New(foundLook(), stubVersion)
+	out, err := adapter.RunPipeline(reg, adapter.HostKiro, run, adapter.ProjectionContext{}, "0.0.0-test", adapter.RunPolicy{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Report.Decision == "refused" {
+		t.Fatalf("kiro MCP env interpolation must not refuse, got %s %+v", out.Report.Decision, out.Report.Security.SecretIsolation)
+	}
+	agentRel := kiro.AgentsDirRel + "/" + run.AgentID + ".json"
+	body := fileBody(out.Plans.Projection.Files, agentRel)
+	if strings.Contains(body, adapter.SecretPlaceholder("A2H_TEST_TOKEN")) {
+		t.Fatal("Kiro agent JSON must not use overlay placeholders")
+	}
+	if !strings.Contains(body, adapter.HostEnvInterpolation("A2H_TEST_TOKEN")) {
+		t.Fatalf("Kiro agent JSON must use ${NAME} per host docs:\n%s", body)
+	}
+	for _, f := range out.Plans.Projection.Files {
+		if f.RelPath == agentRel && f.Class != adapter.DestProjection {
+			t.Fatalf("agent card class %s", f.Class)
+		}
+	}
+	found := false
+	for _, s := range out.Plans.Launch.Secrets {
+		if s.Name == "A2H_TEST_TOKEN" && s.DeliverProcessEnv {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("Kiro must deliver MCP secrets via process env: %+v", out.Plans.Launch.Secrets)
+	}
+}
+
 func TestProjectRefusedError(t *testing.T) {
 	d := adapter.FixtureDriver{Observed: adapter.ProbeResult{HostID: "codex"}}
 	_, _, err := d.Project(sampleRun(false, false), d.Observed, compatibility.Report{Decision: "refused"}, adapter.ProjectionContext{})
