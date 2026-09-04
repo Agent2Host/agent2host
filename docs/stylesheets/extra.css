@@ -44,8 +44,8 @@
 }
 
 .md-header__topic:first-child {
-  font-size: 0.9rem;
-  font-weight: 720;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .md-header__topic:last-child {
