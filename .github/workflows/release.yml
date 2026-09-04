@@ -117,3 +117,25 @@ jobs:
             dist/a2h-${TAG}-linux-arm64.tar.gz \
             dist/SHA256SUMS \
             dist/a2h.rb
+      - name: Publish formula to Homebrew tap
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "HOMEBREW_TAP_TOKEN is not set. Add a fine-grained PAT with contents write on Agent2Host/homebrew-tap."
+            exit 1
+          fi
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/Agent2Host/homebrew-tap.git" tap-src
+          mkdir -p tap-src/Formula
+          cp dist/a2h.rb tap-src/Formula/a2h.rb
+          cd tap-src
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/a2h.rb
+          if git diff --cached --quiet; then
+            echo "formula unchanged"
+            exit 0
+          fi
+          git commit -m "a2h ${VERSION}"
+          git push
