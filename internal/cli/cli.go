@@ -37,6 +37,20 @@ func Main(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return ExitUsage
 	}
+	if f.printHelp || f.cmd == "help" {
+		topic := f.cmd
+		if topic == "help" && len(f.rest) == 1 {
+			topic = f.rest[0]
+		}
+		if topic == "" || topic == "help" {
+			return cmdHelp(stdout)
+		}
+		if err := cmdHelpTopic(stdout, topic); err != nil {
+			fmt.Fprintln(stderr, err)
+			return ExitUsage
+		}
+		return ExitOK
+	}
 	if f.jsonOut && f.verbose {
 		fmt.Fprintln(stderr, "--json and --verbose cannot be used together")
 		return ExitUsage
@@ -134,6 +148,78 @@ func Main(args []string, stdout, stderr io.Writer) int {
 	}
 }
 
+func cmdHelp(stdout io.Writer) int {
+	fmt.Fprint(stdout, `Agent2Host — register an Agent System and run a named agent on a host.
+
+Usage:
+  a2h [--home dir] [--json] <command> ...
+
+Commands:
+  register <system-source-dir>
+  list
+  inspect <system-id>/<agent-id>
+  check   <system-id>/<agent-id> --host <host> [--project dir] [--require-strict-read]
+  run     <system-id>/<agent-id> --host <host> [--project dir] [--verbose] [--accept-warnings]
+  remove  <system-id>
+  clean   [--runtime] [--quarantine] [--host-state --host <id>] [--dry-run]
+  version
+  help
+
+Hosts: claude-code, kiro, codex
+
+The host working folder is the work root declared by the Agent System,
+not the folder you registered from. See the README.
+
+`)
+	return ExitOK
+}
+
+func cmdHelpTopic(stdout io.Writer, topic string) error {
+	text, ok := commandHelp[topic]
+	if !ok {
+		return fmt.Errorf("unknown command %q", topic)
+	}
+	fmt.Fprint(stdout, text)
+	return nil
+}
+
+var commandHelp = map[string]string{
+	"register": `Usage:
+  a2h register <system-source-dir>
+
+Stores a snapshot of the Agent System folder. Edit the files, then register again.
+`,
+	"list": `Usage:
+  a2h list
+
+Lists registered systems. The id is from system.json, not the folder name.
+`,
+	"inspect": `Usage:
+  a2h inspect <system-id>/<agent-id>
+`,
+	"check": `Usage:
+  a2h check <system-id>/<agent-id> --host <host> [--project dir] [--require-strict-read]
+
+Reports whether that host can start this agent. Does not launch the host.
+Does not create a missing fixed work root.
+`,
+	"run": `Usage:
+  a2h run <system-id>/<agent-id> --host <host> [--project dir] [--verbose] [--accept-warnings]
+
+Starts the host in the work root declared by the Agent System.
+--project is only valid when work_root.mode is invocation.
+`,
+	"remove": `Usage:
+  a2h remove <system-id>
+`,
+	"clean": `Usage:
+  a2h clean [--runtime] [--quarantine] [--host-state --host <id>] [--dry-run]
+`,
+	"version": `Usage:
+  a2h version
+`,
+}
+
 func resolveHome(flagHome string) (string, error) {
 	if flagHome != "" {
 		return srcpath.ResolveRoot(flagHome)
@@ -155,6 +241,7 @@ type parsed struct {
 	requireStrictRead                           bool
 	runtimeScope, quarantine, hostState, dryRun bool
 	printVersion                                bool
+	printHelp                                   bool
 }
 
 func parseArgs(args []string) (parsed, error) {
@@ -187,6 +274,8 @@ func parseArgs(args []string) (parsed, error) {
 			f.project = args[i]
 		case strings.HasPrefix(a, "--project="):
 			f.project = strings.TrimPrefix(a, "--project=")
+		case a == "--help", a == "-h":
+			f.printHelp = true
 		case a == "--version":
 			f.printVersion = true
 		case a == "--json":
@@ -226,6 +315,9 @@ func parseArgs(args []string) (parsed, error) {
 
 func validateCommandFlags(f parsed) error {
 	cmd := f.cmd
+	if f.printHelp && (cmd == "" || cmd == "help") {
+		cmd = "help"
+	}
 	if f.printVersion && (cmd == "" || cmd == "version") {
 		cmd = "version"
 	}
@@ -254,7 +346,7 @@ func validateCommandFlags(f parsed) error {
 			"--require-strict-read": f.requireStrictRead,
 			"--project":             f.project != "",
 		})
-	case "register", "list", "inspect", "remove", "resolve", "version", "":
+	case "register", "list", "inspect", "remove", "resolve", "version", "help", "":
 		if f.host != "" {
 			return unusedFlagMessage(cmd, "--host")
 		}

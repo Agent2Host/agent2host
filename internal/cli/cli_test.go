@@ -208,6 +208,45 @@ func TestCLIUnknownCommand(t *testing.T) {
 	}
 }
 
+func TestCLIHelp(t *testing.T) {
+	for _, args := range [][]string{{"a2h", "--help"}, {"a2h", "-h"}, {"a2h", "help"}} {
+		var out, errb bytes.Buffer
+		code := cli.Main(args, &out, &errb)
+		if code != 0 {
+			t.Fatalf("%v: code %d stderr=%q", args, code, errb.String())
+		}
+		if !strings.Contains(out.String(), "register <system-source-dir>") || !strings.Contains(out.String(), "help") {
+			t.Fatalf("%v: stdout %q", args, out.String())
+		}
+		if strings.Contains(out.String(), "resolve") {
+			t.Fatalf("%v: help must not list resolve", args)
+		}
+		if errb.Len() != 0 {
+			t.Fatalf("%v: stderr %q", args, errb.String())
+		}
+	}
+}
+
+func TestCLICommandHelp(t *testing.T) {
+	for _, args := range [][]string{
+		{"a2h", "run", "--help"},
+		{"a2h", "--help", "run"},
+		{"a2h", "help", "run"},
+	} {
+		var out, errb bytes.Buffer
+		code := cli.Main(args, &out, &errb)
+		if code != 0 {
+			t.Fatalf("%v: code %d stderr=%q", args, code, errb.String())
+		}
+		if !strings.Contains(out.String(), "a2h run") || !strings.Contains(out.String(), "--project") {
+			t.Fatalf("%v: stdout %q", args, out.String())
+		}
+		if strings.Contains(out.String(), "resolve") {
+			t.Fatalf("%v: must not list resolve", args)
+		}
+	}
+}
+
 func TestCLIUsageOmitsResolve(t *testing.T) {
 	var out, errb bytes.Buffer
 	code := cli.Main([]string{"a2h"}, &out, &errb)
