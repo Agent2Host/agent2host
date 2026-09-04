@@ -6,7 +6,7 @@ Agent2Host does that. You write the agent as a folder, register a snapshot on th
 
 It is not a new chat app and not a new model. It does not install Claude Code, Kiro, or Codex, and it does not sign you in. If you only want to open those hosts and talk, you do not need Agent2Host.
 
-This is a public alpha (`v0.1.0-alpha.1`), not a stable 1.0. There is no Homebrew install yet.
+This is a public alpha, not a stable 1.0. `a2h version` prints the exact build.
 
 ```text
 Folder on disk
@@ -31,43 +31,40 @@ Folder on disk
 
 ## Install
 
-Direct download is the supported path today. Do not use Homebrew yet.
-
-Download the archive that matches your machine from [Releases](https://github.com/agent2host/agent2host/releases/tag/v0.1.0-alpha.1):
-
-| Machine | Archive |
-| --- | --- |
-| Apple Silicon Mac | `a2h-v0.1.0-alpha.1-darwin-arm64.tar.gz` |
-| Intel Mac | `a2h-v0.1.0-alpha.1-darwin-amd64.tar.gz` |
-| Linux x86_64 | `a2h-v0.1.0-alpha.1-linux-amd64.tar.gz` |
-| Linux arm64 | `a2h-v0.1.0-alpha.1-linux-arm64.tar.gz` |
-
-Apple Silicon Mac:
+Homebrew is the recommended path. It installs only the Agent2Host binary.
 
 ```bash
-mkdir -p "$HOME/bin"
-curl -fL -o /tmp/a2h.tgz \
-  https://github.com/agent2host/agent2host/releases/download/v0.1.0-alpha.1/a2h-v0.1.0-alpha.1-darwin-arm64.tar.gz
-tar -xzf /tmp/a2h.tgz -C "$HOME/bin"
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+brew install agent2host/tap/a2h
 which a2h
 a2h version
 a2h help
 ```
 
-A released binary prints `0.1.0-alpha.1`. Linux: use the matching archive and add `$HOME/bin` in `~/.bashrc`.
+Later: `brew update && brew upgrade a2h`.
 
-Optional checksum:
+Without Homebrew, download the archive for your machine from the [latest Release](https://github.com/agent2host/agent2host/releases/latest). Copy the tag from that page, then:
+
+| Machine | Archive suffix |
+| --- | --- |
+| Apple Silicon Mac | `darwin-arm64.tar.gz` |
+| Intel Mac | `darwin-amd64.tar.gz` |
+| Linux x86_64 | `linux-amd64.tar.gz` |
+| Linux arm64 | `linux-arm64.tar.gz` |
 
 ```bash
-curl -fL -o /tmp/SHA256SUMS \
-  https://github.com/agent2host/agent2host/releases/download/v0.1.0-alpha.1/SHA256SUMS
-shasum -a 256 /tmp/a2h.tgz
-grep darwin-arm64 /tmp/SHA256SUMS
+# Paste the latest tag from the Releases page, then:
+TAG=
+mkdir -p "$HOME/bin"
+curl -fL -o /tmp/a2h.tgz \
+  "https://github.com/agent2host/agent2host/releases/download/${TAG}/a2h-${TAG}-darwin-arm64.tar.gz"
+tar -xzf /tmp/a2h.tgz -C "$HOME/bin"
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+which a2h
+a2h version
 ```
 
-The `shasum` value must match the line for that archive.
+Linux: use the matching archive and add `$HOME/bin` in `~/.bashrc`. Every release also publishes `SHA256SUMS` for the same tag.
 
 To build from source you need Go 1.22 or newer. After `go build -o a2h ./cmd/a2h` the binary is only in the current directory and prints `0.0.0-dev`. Use `./a2h` unless you copy it onto your `PATH`.
 

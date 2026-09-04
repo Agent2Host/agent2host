@@ -107,7 +107,6 @@ Agent2Host is pre-release software. Before using it for sensitive work, know the
 - Agent2Host does not guarantee that every supported host can strictly limit reads; an ordinary `run` may allow reads outside the work root;
 - hosts can represent the same permission request differently, and an unverified restriction is shown as a warning rather than a guarantee;
 - supported host behavior is verified only for the version families listed in the compatibility reference;
-- Homebrew installation is not available yet;
 - Agent2Host does not preserve a host conversation between separate runs.
 
 [Read all supported hosts and limitations →](reference/hosts-and-limits.md)

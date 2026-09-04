@@ -54,7 +54,6 @@ Read [Permissions and safety](../guides/permissions-and-safety.md) before defini
 - Codex may show its standard interface instead of a native named-Agent view.
 - A completed `run` does not carry the host's chat history into a later run.
 - Arbitrary native-host arguments are not forwarded.
-- Homebrew installation is not available yet.
 - Agent2Host does not manage model selection, accounts, host installation, or host upgrades.
 - Compatibility is checked at launch time; it is not continuous monitoring of the host after launch.
 - On Kiro, MCP and hook secret values are placed on that run's host process environment so they are not written into model-readable config. Agent2Host does not claim those values are hidden from the session or isolated between tools.
